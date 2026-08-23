@@ -3,107 +3,194 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>高爾夫揮桿分析 v0.2</title>
+<title>高爾夫揮桿分析 v0.3</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17201a;background:#f5f7f5}
 body{margin:0}.wrap{max-width:820px;margin:auto;padding:18px}
 h1{font-size:26px;margin:8px 0}.sub{color:#607066;margin-bottom:16px}
-.card{background:#fff;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 3px 18px #0000000d}
-input,button{font:inherit}input[type=file]{width:100%}
-.stage{position:relative;width:100%;background:#111;border-radius:14px;overflow:hidden;margin-top:12px;min-height:180px}
-video{display:block;width:100%;height:auto}canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-button{width:100%;padding:13px;border:0;border-radius:12px;background:#17201a;color:#fff;font-weight:700;margin-top:10px}
-button:disabled{opacity:.35}.status{font-size:14px;color:#526057;margin-top:8px;white-space:pre-line}
-.error{color:#b42318}.ok{color:#067647}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.card{background:white;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 3px 18px #0000000d}
+input,button{font:inherit} input[type=file]{width:100%}
+.stage{position:relative;width:100%;background:#111;border-radius:14px;overflow:hidden;margin-top:12px}
+video{display:block;width:100%;height:auto;background:#000}canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+button{width:100%;padding:13px;border:0;border-radius:12px;background:#17201a;color:white;font-weight:700;margin-top:10px}
+button.secondary{background:#e8ece9;color:#17201a}
+button:disabled{opacity:.42}.status{font-size:14px;color:#526057;margin-top:8px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .metric{background:#f2f5f2;border-radius:12px;padding:10px}.metric b{display:block;font-size:21px;margin-top:4px}
 .small{font-size:12px;color:#66736a}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ef;font-size:12px;margin-top:8px}
+.err{color:#a62626}.ok{color:#246b3b}
 </style>
 </head>
 <body><main class="wrap">
 <h1>⛳ 高爾夫揮桿分析</h1>
-<div class="sub">v0.2｜iPhone MOV / Safari 相容性改善</div>
+<div class="sub">v0.3｜iPhone MOV / Safari 相容性改善</div>
+
 <section class="card">
-<input id="file" type="file" accept="video/*,.mov,.mp4,.m4v">
+<input id="file" type="file" accept="video/*,.mov,video/quicktime">
 <div class="stage"><video id="video" controls playsinline webkit-playsinline preload="metadata"></video><canvas id="canvas"></canvas></div>
+<div class="controls">
 <button id="start" disabled>開始分析</button>
+<button id="reset" class="secondary" disabled>重設</button>
+<button id="prev" class="secondary" disabled>上一格</button>
+<button id="next" class="secondary" disabled>下一格</button>
+</div>
 <div class="status" id="status">請先選擇一段揮桿影片。</div>
+<div class="badge" id="meta">尚未載入影片</div>
 </section>
-<section class="card"><div class="grid">
+
+<section class="card">
+<div class="grid">
 <div class="metric">左手肘<b id="le">—</b><span class="small">度</span></div>
 <div class="metric">右手肘<b id="re">—</b><span class="small">度</span></div>
 <div class="metric">左膝<b id="lk">—</b><span class="small">度</span></div>
 <div class="metric">右膝<b id="rk">—</b><span class="small">度</span></div>
 <div class="metric">軀幹傾角<b id="sp">—</b><span class="small">相對垂直線</span></div>
 <div class="metric">頭部偏移<b id="hd">—</b><span class="small">畫面寬度 %</span></div>
-</div></section>
+</div>
+</section>
 </main>
+
 <script type="module">
-import {PoseLandmarker, FilesetResolver, DrawingUtils} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
-const $=id=>document.getElementById(id),v=$("video"),c=$("canvas"),ctx=c.getContext("2d");
-let pose=null,running=false,last=-1,baseNose=null,currentURL=null;
-function msg(t,cls=""){const s=$("status");s.textContent=t;s.className="status "+cls}
-$("file").addEventListener("change",e=>{
- const f=e.target.files && e.target.files[0];
- running=false;$("start").disabled=true;baseNose=null;
- if(!f){msg("沒有選到影片。","error");return}
- if(currentURL) URL.revokeObjectURL(currentURL);
- currentURL=URL.createObjectURL(f); v.src=currentURL; v.load();
- msg(`已選擇：${f.name}\n正在讀取影片…`);
- // Important for iOS: enable once a real file has been selected, rather than waiting on one specific media event.
- $("start").disabled=false;
-});
-v.addEventListener("loadedmetadata",()=>{
- $("start").disabled=false;
- msg(`影片載入成功｜${v.videoWidth} × ${v.videoHeight}｜${v.duration.toFixed(1)} 秒`,"ok");
-});
-v.addEventListener("canplay",()=>{$("start").disabled=false});
-v.addEventListener("error",()=>{
- const code=v.error?.code||"未知";
- msg(`影片無法由 Safari 解碼（錯誤 ${code}）。\n若是 iPhone MOV/HEVC，可先在「照片」分享至「檔案」後再試；若仍失敗，建議轉成 H.264 MP4。`,"error");
-});
-$("start").addEventListener("click",async()=>{
- if(!v.src){msg("請先選擇影片。","error");return}
- $("start").disabled=true;
- try{
-  if(!pose){
-   msg("正在載入人體姿態 AI 模型，第一次約需數秒…");
-   const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm");
-   pose=await PoseLandmarker.createFromOptions(vision,{
-    baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"},
-    runningMode:"VIDEO",numPoses:1
-   });
-  }
-  running=true;baseNose=null;last=-1;
-  msg("分析已啟動。播放或拖曳影片即可查看骨架與角度。","ok");
-  try{await v.play()}catch(e){msg("分析已啟動。請手動按影片的播放鍵。","ok")}
-  requestAnimationFrame(loop);
- }catch(err){
-  console.error(err);msg("AI 模型載入失敗。請確認手機有網路，重新整理頁面後再試。\n"+err.message,"error");
- }finally{$("start").disabled=false}
-});
+import {PoseLandmarker, FilesetResolver, DrawingUtils}
+from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
+
+const $=id=>document.getElementById(id);
+const v=$("video"), c=$("canvas"), ctx=c.getContext("2d");
+let pose=null, running=false, lastTime=-1, baseNose=null, objectUrl=null;
+let fpsGuess=30;
+
+function setStatus(msg, type=""){
+  const s=$("status"); s.textContent=msg; s.className="status "+type;
+}
+function setButtons(loaded){
+  $("start").disabled=!loaded;
+  $("reset").disabled=!loaded;
+  $("prev").disabled=!loaded;
+  $("next").disabled=!loaded;
+}
+function setMetric(id,x){$(id).textContent=Number.isFinite(x)?Math.round(x):"—"}
+function clearMetrics(){["le","re","lk","rk","sp","hd"].forEach(id=>$(id).textContent="—")}
 function angle(a,b,d){
- const ux=a.x-b.x,uy=a.y-b.y,wx=d.x-b.x,wy=d.y-b.y;
- const den=Math.hypot(ux,uy)*Math.hypot(wx,wy); if(!den)return NaN;
- return Math.acos(Math.max(-1,Math.min(1,(ux*wx+uy*wy)/den)))*180/Math.PI
+  const u=[a.x-b.x,a.y-b.y], w=[d.x-b.x,d.y-b.y];
+  const den=Math.hypot(...u)*Math.hypot(...w);
+  if(!den) return NaN;
+  const cos=Math.max(-1,Math.min(1,(u[0]*w[0]+u[1]*w[1])/den));
+  return Math.acos(cos)*180/Math.PI;
 }
-function set(id,x){$(id).textContent=Number.isFinite(x)?Math.round(x):"—"}
-function loop(){
- if(!running)return;
- if(v.readyState>=2 && v.videoWidth && v.currentTime!==last){
-  last=v.currentTime;c.width=v.videoWidth;c.height=v.videoHeight;
+function waitForVideoReady(){
+  return new Promise((resolve,reject)=>{
+    if(v.readyState>=1 && Number.isFinite(v.duration) && v.duration>0) return resolve();
+    const onMeta=()=>{cleanup(); resolve();}
+    const onErr=()=>{cleanup(); reject(v.error || new Error("影片載入失敗"))}
+    const cleanup=()=>{v.removeEventListener("loadedmetadata",onMeta);v.removeEventListener("error",onErr)}
+    v.addEventListener("loadedmetadata",onMeta,{once:true});
+    v.addEventListener("error",onErr,{once:true});
+  });
+}
+async function loadPose(){
+  if(pose) return;
+  setStatus("正在載入姿態辨識模型…");
+  const vision=await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
+  );
+  pose=await PoseLandmarker.createFromOptions(vision,{
+    baseOptions:{
+      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"
+    },
+    runningMode:"VIDEO",
+    numPoses:1,
+    minPoseDetectionConfidence:0.45,
+    minPosePresenceConfidence:0.45,
+    minTrackingConfidence:0.45
+  });
+}
+async function analyzeCurrentFrame(){
+  if(!pose || v.readyState<2) return;
+  c.width=v.videoWidth||1; c.height=v.videoHeight||1;
+  const r=pose.detectForVideo(v, Math.max(0, v.currentTime*1000));
+  const lm=r.landmarks?.[0];
+  ctx.clearRect(0,0,c.width,c.height);
+  if(!lm){
+    setStatus("目前畫面未偵測到完整人體。請確認全身有入鏡。");
+    return;
+  }
+  const du=new DrawingUtils(ctx);
+  du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{lineWidth:3});
+  du.drawLandmarks(lm,{radius:3});
+  setMetric("le",angle(lm[11],lm[13],lm[15]));
+  setMetric("re",angle(lm[12],lm[14],lm[16]));
+  setMetric("lk",angle(lm[23],lm[25],lm[27]));
+  setMetric("rk",angle(lm[24],lm[26],lm[28]));
+  const sh={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2};
+  const hp={x:(lm[23].x+lm[24].x)/2,y:(lm[23].y+lm[24].y)/2};
+  setMetric("sp",Math.atan2(Math.abs(sh.x-hp.x),Math.abs(sh.y-hp.y))*180/Math.PI);
+  if(baseNose===null) baseNose=lm[0].x;
+  setMetric("hd",Math.abs(lm[0].x-baseNose)*100);
+  setStatus("已偵測到人體，分析正常。","ok");
+}
+async function loop(){
+  if(!running) return;
+  if(v.currentTime!==lastTime){
+    lastTime=v.currentTime;
+    try{ await analyzeCurrentFrame(); }
+    catch(e){ setStatus("分析失敗："+(e?.message||e),"err"); running=false; return; }
+  }
+  requestAnimationFrame(loop);
+}
+
+$("file").addEventListener("change", async e=>{
+  clearMetrics(); ctx.clearRect(0,0,c.width,c.height); baseNose=null; running=false;
+  const f=e.target.files?.[0];
+  if(!f){ setButtons(false); setStatus("請先選擇一段揮桿影片。"); return; }
   try{
-   const r=pose.detectForVideo(v,Math.round(v.currentTime*1000)),lm=r.landmarks?.[0];
-   ctx.clearRect(0,0,c.width,c.height);
-   if(lm){
-    const du=new DrawingUtils(ctx);du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{lineWidth:3});du.drawLandmarks(lm,{radius:3});
-    set("le",angle(lm[11],lm[13],lm[15]));set("re",angle(lm[12],lm[14],lm[16]));
-    set("lk",angle(lm[23],lm[25],lm[27]));set("rk",angle(lm[24],lm[26],lm[28]));
-    const sh={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2},hp={x:(lm[23].x+lm[24].x)/2,y:(lm[23].y+lm[24].y)/2};
-    set("sp",Math.atan2(Math.abs(sh.x-hp.x),Math.abs(sh.y-hp.y))*180/Math.PI);
-    if(baseNose===null)baseNose=lm[0].x;set("hd",Math.abs(lm[0].x-baseNose)*100);
-   }
-  }catch(e){console.error(e)}
- }
- requestAnimationFrame(loop)
+    if(objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl=URL.createObjectURL(f);
+    v.src=objectUrl;
+    v.load();
+    setStatus("正在讀取影片資訊…");
+    await waitForVideoReady();
+    const dur=Number.isFinite(v.duration)?v.duration:0;
+    $("meta").textContent=`${f.name}｜${(f.size/1024/1024).toFixed(1)} MB｜${dur.toFixed(2)} 秒`;
+    setButtons(true);
+    setStatus("影片已載入，可以開始分析。","ok");
+  }catch(err){
+    setButtons(false);
+    $("meta").textContent=f.name;
+    setStatus("Safari 無法讀取這支影片。請嘗試從「照片」另存影片，或轉成 H.264 MP4 後再上傳。","err");
+  }
+});
+
+$("start").addEventListener("click", async()=>{
+  try{
+    await loadPose();
+    baseNose=null; lastTime=-1; running=true;
+    setStatus("分析中：可播放、暫停或拖曳影片。","ok");
+    try{ await v.play(); }catch{}
+    requestAnimationFrame(loop);
+  }catch(e){
+    setStatus("模型載入失敗，請確認手機有網路："+(e?.message||e),"err");
+  }
+});
+
+$("reset").addEventListener("click",()=>{
+  running=false; v.pause(); v.currentTime=0; baseNose=null; lastTime=-1;
+  ctx.clearRect(0,0,c.width,c.height); clearMetrics();
+  setStatus("已重設，可重新開始分析。");
+});
+
+async function step(dir){
+  if(!pose){ try{await loadPose();}catch(e){setStatus("模型載入失敗。","err");return;} }
+  running=false; v.pause();
+  v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+dir*(1/fpsGuess)));
+  await new Promise(r=>setTimeout(r,80));
+  try{await analyzeCurrentFrame();}catch(e){setStatus("逐格分析失敗。","err")}
 }
-</script></body></html>
+$("prev").addEventListener("click",()=>step(-1));
+$("next").addEventListener("click",()=>step(1));
+
+v.addEventListener("seeked",()=>{ if(pose && !running) analyzeCurrentFrame().catch(()=>{}); });
+v.addEventListener("ended",()=>{ running=false; setStatus("影片播放完成。","ok"); });
+</script>
+</body></html>
