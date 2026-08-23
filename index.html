@@ -3,41 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>高爾夫揮桿分析 v0.3</title>
+<title>高爾夫揮桿分析 v0.4</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17201a;background:#f5f7f5}
 body{margin:0}.wrap{max-width:820px;margin:auto;padding:18px}
 h1{font-size:26px;margin:8px 0}.sub{color:#607066;margin-bottom:16px}
-.card{background:white;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 3px 18px #0000000d}
-input,button{font:inherit} input[type=file]{width:100%}
+.card{background:#fff;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 3px 18px #0000000d}
 .stage{position:relative;width:100%;background:#111;border-radius:14px;overflow:hidden;margin-top:12px}
-video{display:block;width:100%;height:auto;background:#000}canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-button{width:100%;padding:13px;border:0;border-radius:12px;background:#17201a;color:white;font-weight:700;margin-top:10px}
-button.secondary{background:#e8ece9;color:#17201a}
-button:disabled{opacity:.42}.status{font-size:14px;color:#526057;margin-top:8px;line-height:1.5}
+video{display:block;width:100%;height:auto;background:#000;min-height:220px}
+canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+button{width:100%;padding:13px;border:0;border-radius:12px;background:#17201a;color:#fff;font-weight:700;margin-top:10px}
+button.secondary{background:#e8ece9;color:#17201a} button:disabled{opacity:.42}
+.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.status{font-size:14px;color:#526057;margin-top:8px;line-height:1.5}
+.ok{color:#246b3b}.err{color:#a62626}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .metric{background:#f2f5f2;border-radius:12px;padding:10px}.metric b{display:block;font-size:21px;margin-top:4px}
-.small{font-size:12px;color:#66736a}
-.controls{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ef;font-size:12px;margin-top:8px}
-.err{color:#a62626}.ok{color:#246b3b}
+.small{font-size:12px;color:#66736a}.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ef;font-size:12px;margin-top:8px}
+.debug{font-size:12px;color:#78847c;margin-top:8px;word-break:break-word}
 </style>
 </head>
-<body><main class="wrap">
+<body>
+<main class="wrap">
 <h1>⛳ 高爾夫揮桿分析</h1>
-<div class="sub">v0.3｜iPhone MOV / Safari 相容性改善</div>
+<div class="sub">v0.4｜Safari JavaScript 修正版</div>
 
 <section class="card">
-<input id="file" type="file" accept="video/*,.mov,video/quicktime">
-<div class="stage"><video id="video" controls playsinline webkit-playsinline preload="metadata"></video><canvas id="canvas"></canvas></div>
+<input id="file" type="file" accept="video/*,.mov,.mp4,video/quicktime,video/mp4">
+<div class="stage">
+<video id="video" controls playsinline webkit-playsinline preload="metadata"></video>
+<canvas id="canvas"></canvas>
+</div>
 <div class="controls">
 <button id="start" disabled>開始分析</button>
 <button id="reset" class="secondary" disabled>重設</button>
 <button id="prev" class="secondary" disabled>上一格</button>
 <button id="next" class="secondary" disabled>下一格</button>
 </div>
-<div class="status" id="status">請先選擇一段揮桿影片。</div>
-<div class="badge" id="meta">尚未載入影片</div>
+<div id="status" class="status">JavaScript 已啟動，請選擇影片。</div>
+<div id="meta" class="badge">尚未載入影片</div>
+<div id="debug" class="debug">系統狀態：READY</div>
 </section>
 
 <section class="card">
@@ -52,145 +57,142 @@ button:disabled{opacity:.42}.status{font-size:14px;color:#526057;margin-top:8px;
 </section>
 </main>
 
-<script type="module">
-import {PoseLandmarker, FilesetResolver, DrawingUtils}
-from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
-
+<script>
+(function(){
+"use strict";
 const $=id=>document.getElementById(id);
 const v=$("video"), c=$("canvas"), ctx=c.getContext("2d");
-let pose=null, running=false, lastTime=-1, baseNose=null, objectUrl=null;
-let fpsGuess=30;
+let objectUrl=null, pose=null, DrawingUtils=null, PoseLandmarker=null;
+let running=false,lastTime=-1,baseNose=null;
 
-function setStatus(msg, type=""){
-  const s=$("status"); s.textContent=msg; s.className="status "+type;
-}
-function setButtons(loaded){
-  $("start").disabled=!loaded;
-  $("reset").disabled=!loaded;
-  $("prev").disabled=!loaded;
-  $("next").disabled=!loaded;
-}
-function setMetric(id,x){$(id).textContent=Number.isFinite(x)?Math.round(x):"—"}
-function clearMetrics(){["le","re","lk","rk","sp","hd"].forEach(id=>$(id).textContent="—")}
+function status(t,cls=""){ $("status").textContent=t; $("status").className="status "+cls; }
+function debug(t){ $("debug").textContent="系統狀態："+t; }
+function enable(on){ ["start","reset","prev","next"].forEach(id=>$(id).disabled=!on); }
+function clearMetrics(){ ["le","re","lk","rk","sp","hd"].forEach(id=>$(id).textContent="—"); }
+function setMetric(id,x){ $(id).textContent=Number.isFinite(x)?Math.round(x):"—"; }
 function angle(a,b,d){
-  const u=[a.x-b.x,a.y-b.y], w=[d.x-b.x,d.y-b.y];
-  const den=Math.hypot(...u)*Math.hypot(...w);
-  if(!den) return NaN;
-  const cos=Math.max(-1,Math.min(1,(u[0]*w[0]+u[1]*w[1])/den));
-  return Math.acos(cos)*180/Math.PI;
+ const ux=a.x-b.x, uy=a.y-b.y, vx=d.x-b.x, vy=d.y-b.y;
+ const den=Math.hypot(ux,uy)*Math.hypot(vx,vy); if(!den)return NaN;
+ const cs=Math.max(-1,Math.min(1,(ux*vx+uy*vy)/den));
+ return Math.acos(cs)*180/Math.PI;
 }
-function waitForVideoReady(){
-  return new Promise((resolve,reject)=>{
-    if(v.readyState>=1 && Number.isFinite(v.duration) && v.duration>0) return resolve();
-    const onMeta=()=>{cleanup(); resolve();}
-    const onErr=()=>{cleanup(); reject(v.error || new Error("影片載入失敗"))}
-    const cleanup=()=>{v.removeEventListener("loadedmetadata",onMeta);v.removeEventListener("error",onErr)}
-    v.addEventListener("loadedmetadata",onMeta,{once:true});
-    v.addEventListener("error",onErr,{once:true});
-  });
+
+window.addEventListener("error",e=>{ debug("JS ERROR: "+(e.message||"unknown")); });
+window.addEventListener("unhandledrejection",e=>{ debug("PROMISE ERROR: "+String(e.reason||"unknown")); });
+
+$("file").addEventListener("change", function(e){
+ try{
+  const f=e.target.files && e.target.files[0];
+  clearMetrics(); running=false; baseNose=null; lastTime=-1;
+  if(!f){ enable(false); status("請選擇影片。"); return; }
+
+  if(objectUrl) URL.revokeObjectURL(objectUrl);
+  objectUrl=URL.createObjectURL(f);
+  v.src=objectUrl;
+  v.load();
+
+  // 重點：只要選到檔案，就先讓按鈕可按，不再卡 loadedmetadata
+  enable(true);
+  $("meta").textContent=f.name+"｜"+(f.size/1024/1024).toFixed(1)+" MB";
+  status("已選擇影片，正在讀取影片資訊…","ok");
+  debug("FILE_SELECTED");
+
+  v.onloadedmetadata=function(){
+    $("meta").textContent=f.name+"｜"+(f.size/1024/1024).toFixed(1)+" MB｜"+(v.duration||0).toFixed(2)+" 秒";
+    status("影片已載入，可以開始分析。","ok");
+    debug("VIDEO_METADATA_OK");
+  };
+  v.oncanplay=function(){ debug("VIDEO_CAN_PLAY"); };
+  v.onerror=function(){
+    status("瀏覽器無法播放此影片，但檔案選取功能正常。","err");
+    debug("VIDEO_ERROR code="+(v.error?v.error.code:"?"));
+  };
+ }catch(err){
+  status("選擇影片時發生錯誤："+err.message,"err");
+  debug("FILE_HANDLER_ERROR");
+ }
+});
+
+async function loadMediaPipe(){
+ if(pose) return;
+ status("影片讀取成功。現在載入人體辨識模型…");
+ debug("MEDIAPIPE_IMPORTING");
+ const mp = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm");
+ DrawingUtils=mp.DrawingUtils; PoseLandmarker=mp.PoseLandmarker;
+ const vision=await mp.FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
+ );
+ pose=await PoseLandmarker.createFromOptions(vision,{
+  baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"},
+  runningMode:"VIDEO",numPoses:1,
+  minPoseDetectionConfidence:.45,minPosePresenceConfidence:.45,minTrackingConfidence:.45
+ });
+ debug("MEDIAPIPE_READY");
 }
-async function loadPose(){
-  if(pose) return;
-  setStatus("正在載入姿態辨識模型…");
-  const vision=await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
-  );
-  pose=await PoseLandmarker.createFromOptions(vision,{
-    baseOptions:{
-      modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"
-    },
-    runningMode:"VIDEO",
-    numPoses:1,
-    minPoseDetectionConfidence:0.45,
-    minPosePresenceConfidence:0.45,
-    minTrackingConfidence:0.45
-  });
+
+async function analyze(){
+ if(!pose || v.readyState<2) return;
+ c.width=v.videoWidth||1; c.height=v.videoHeight||1;
+ const result=pose.detectForVideo(v,Math.max(0,v.currentTime*1000));
+ const lm=result.landmarks && result.landmarks[0];
+ ctx.clearRect(0,0,c.width,c.height);
+ if(!lm){ status("目前畫面未偵測到完整人體。"); return; }
+ const du=new DrawingUtils(ctx);
+ du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{lineWidth:3});
+ du.drawLandmarks(lm,{radius:3});
+ setMetric("le",angle(lm[11],lm[13],lm[15]));
+ setMetric("re",angle(lm[12],lm[14],lm[16]));
+ setMetric("lk",angle(lm[23],lm[25],lm[27]));
+ setMetric("rk",angle(lm[24],lm[26],lm[28]));
+ const sh={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2};
+ const hp={x:(lm[23].x+lm[24].x)/2,y:(lm[23].y+lm[24].y)/2};
+ setMetric("sp",Math.atan2(Math.abs(sh.x-hp.x),Math.abs(sh.y-hp.y))*180/Math.PI);
+ if(baseNose===null) baseNose=lm[0].x;
+ setMetric("hd",Math.abs(lm[0].x-baseNose)*100);
+ status("已偵測到人體，分析正常。","ok");
 }
-async function analyzeCurrentFrame(){
-  if(!pose || v.readyState<2) return;
-  c.width=v.videoWidth||1; c.height=v.videoHeight||1;
-  const r=pose.detectForVideo(v, Math.max(0, v.currentTime*1000));
-  const lm=r.landmarks?.[0];
-  ctx.clearRect(0,0,c.width,c.height);
-  if(!lm){
-    setStatus("目前畫面未偵測到完整人體。請確認全身有入鏡。");
+
+async function loop(){
+ if(!running)return;
+ if(v.currentTime!==lastTime){ lastTime=v.currentTime; try{await analyze();}catch(e){status("分析錯誤："+e.message,"err");debug("ANALYZE_ERROR");running=false;return;} }
+ requestAnimationFrame(loop);
+}
+
+$("start").addEventListener("click",async function(){
+ try{
+  if(!v.src){ status("請先選擇影片。","err"); return; }
+  if(v.readyState<2){
+    status("影片尚未可播放；請先按播放器的播放鍵確認影片能正常播放。","err");
+    debug("VIDEO_NOT_READY readyState="+v.readyState);
     return;
   }
-  const du=new DrawingUtils(ctx);
-  du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{lineWidth:3});
-  du.drawLandmarks(lm,{radius:3});
-  setMetric("le",angle(lm[11],lm[13],lm[15]));
-  setMetric("re",angle(lm[12],lm[14],lm[16]));
-  setMetric("lk",angle(lm[23],lm[25],lm[27]));
-  setMetric("rk",angle(lm[24],lm[26],lm[28]));
-  const sh={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2};
-  const hp={x:(lm[23].x+lm[24].x)/2,y:(lm[23].y+lm[24].y)/2};
-  setMetric("sp",Math.atan2(Math.abs(sh.x-hp.x),Math.abs(sh.y-hp.y))*180/Math.PI);
-  if(baseNose===null) baseNose=lm[0].x;
-  setMetric("hd",Math.abs(lm[0].x-baseNose)*100);
-  setStatus("已偵測到人體，分析正常。","ok");
-}
-async function loop(){
-  if(!running) return;
-  if(v.currentTime!==lastTime){
-    lastTime=v.currentTime;
-    try{ await analyzeCurrentFrame(); }
-    catch(e){ setStatus("分析失敗："+(e?.message||e),"err"); running=false; return; }
-  }
-  requestAnimationFrame(loop);
-}
-
-$("file").addEventListener("change", async e=>{
-  clearMetrics(); ctx.clearRect(0,0,c.width,c.height); baseNose=null; running=false;
-  const f=e.target.files?.[0];
-  if(!f){ setButtons(false); setStatus("請先選擇一段揮桿影片。"); return; }
-  try{
-    if(objectUrl) URL.revokeObjectURL(objectUrl);
-    objectUrl=URL.createObjectURL(f);
-    v.src=objectUrl;
-    v.load();
-    setStatus("正在讀取影片資訊…");
-    await waitForVideoReady();
-    const dur=Number.isFinite(v.duration)?v.duration:0;
-    $("meta").textContent=`${f.name}｜${(f.size/1024/1024).toFixed(1)} MB｜${dur.toFixed(2)} 秒`;
-    setButtons(true);
-    setStatus("影片已載入，可以開始分析。","ok");
-  }catch(err){
-    setButtons(false);
-    $("meta").textContent=f.name;
-    setStatus("Safari 無法讀取這支影片。請嘗試從「照片」另存影片，或轉成 H.264 MP4 後再上傳。","err");
-  }
+  await loadMediaPipe();
+  baseNose=null;lastTime=-1;running=true;
+  try{await v.play();}catch(_){}
+  status("分析中…","ok"); requestAnimationFrame(loop);
+ }catch(e){
+  status("人體辨識模型載入失敗："+(e.message||e),"err");
+  debug("MEDIAPIPE_ERROR");
+ }
 });
 
-$("start").addEventListener("click", async()=>{
-  try{
-    await loadPose();
-    baseNose=null; lastTime=-1; running=true;
-    setStatus("分析中：可播放、暫停或拖曳影片。","ok");
-    try{ await v.play(); }catch{}
-    requestAnimationFrame(loop);
-  }catch(e){
-    setStatus("模型載入失敗，請確認手機有網路："+(e?.message||e),"err");
-  }
-});
-
-$("reset").addEventListener("click",()=>{
-  running=false; v.pause(); v.currentTime=0; baseNose=null; lastTime=-1;
-  ctx.clearRect(0,0,c.width,c.height); clearMetrics();
-  setStatus("已重設，可重新開始分析。");
+$("reset").addEventListener("click",function(){
+ running=false;v.pause();v.currentTime=0;baseNose=null;lastTime=-1;
+ ctx.clearRect(0,0,c.width,c.height);clearMetrics();status("已重設。");debug("RESET");
 });
 
 async function step(dir){
-  if(!pose){ try{await loadPose();}catch(e){setStatus("模型載入失敗。","err");return;} }
-  running=false; v.pause();
-  v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+dir*(1/fpsGuess)));
-  await new Promise(r=>setTimeout(r,80));
-  try{await analyzeCurrentFrame();}catch(e){setStatus("逐格分析失敗。","err")}
+ running=false;v.pause();
+ if(!pose){try{await loadMediaPipe();}catch(e){status("模型載入失敗："+e.message,"err");return;}}
+ if(v.readyState<2){status("影片尚未可讀取。","err");return;}
+ v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+dir/30));
+ setTimeout(()=>analyze().catch(e=>status("逐格分析錯誤："+e.message,"err")),100);
 }
 $("prev").addEventListener("click",()=>step(-1));
 $("next").addEventListener("click",()=>step(1));
 
-v.addEventListener("seeked",()=>{ if(pose && !running) analyzeCurrentFrame().catch(()=>{}); });
-v.addEventListener("ended",()=>{ running=false; setStatus("影片播放完成。","ok"); });
+debug("READY - event handlers attached");
+})();
 </script>
-</body></html>
+</body>
+</html>
