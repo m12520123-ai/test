@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>高爾夫揮桿分析</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17201a;background:#f5f7f5}
+body{margin:0}.wrap{max-width:820px;margin:auto;padding:18px}
+h1{font-size:26px;margin:8px 0}.sub{color:#607066;margin-bottom:16px}
+.card{background:white;border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 3px 18px #0000000d}
+input,button{font:inherit} input[type=file]{width:100%}
+.stage{position:relative;width:100%;background:#111;border-radius:14px;overflow:hidden;margin-top:12px}
+video{display:block;width:100%;height:auto}canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+button{width:100%;padding:13px;border:0;border-radius:12px;background:#17201a;color:white;font-weight:700;margin-top:10px}
+button:disabled{opacity:.45}.status{font-size:14px;color:#526057;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.metric{background:#f2f5f2;border-radius:12px;padding:10px}.metric b{display:block;font-size:21px;margin-top:4px}
+.small{font-size:12px;color:#66736a}
+</style>
+</head>
+<body><main class="wrap">
+<h1>⛳ 高爾夫揮桿分析</h1>
+<div class="sub">第一版：手機影片上傳＋人體骨架＋主要關節角度</div>
+
+<section class="card">
+<input id="file" type="file" accept="video/*">
+<div class="stage"><video id="video" controls playsinline></video><canvas id="canvas"></canvas></div>
+<button id="start" disabled>開始分析</button>
+<div class="status" id="status">請先選擇一段揮桿影片。</div>
+</section>
+
+<section class="card">
+<div class="grid">
+<div class="metric">左手肘<b id="le">—</b><span class="small">度</span></div>
+<div class="metric">右手肘<b id="re">—</b><span class="small">度</span></div>
+<div class="metric">左膝<b id="lk">—</b><span class="small">度</span></div>
+<div class="metric">右膝<b id="rk">—</b><span class="small">度</span></div>
+<div class="metric">軀幹傾角<b id="sp">—</b><span class="small">相對垂直線</span></div>
+<div class="metric">頭部偏移<b id="hd">—</b><span class="small">畫面寬度 %</span></div>
+</div>
+</section>
+</main>
+
+<script type="module">
+import {PoseLandmarker, FilesetResolver, DrawingUtils}
+from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm";
+
+const $=id=>document.getElementById(id), v=$("video"), c=$("canvas"), ctx=c.getContext("2d");
+let pose, running=false, last=-1, baseNose=null;
+
+$("file").onchange=e=>{
+ const f=e.target.files[0]; if(!f)return;
+ v.src=URL.createObjectURL(f); $("start").disabled=false; $("status").textContent="影片已載入。";
+};
+$("start").onclick=async()=>{
+ if(!pose){
+  $("status").textContent="正在載入姿態辨識模型…";
+  const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm");
+  pose=await PoseLandmarker.createFromOptions(vision,{
+   baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"},
+   runningMode:"VIDEO",numPoses:1
+  });
+ }
+ running=true;baseNose=null;$("status").textContent="分析中：播放或拖曳影片即可查看姿態。"; v.play(); requestAnimationFrame(loop);
+};
+function ang(a,b,d){
+ const u=[a.x-b.x,a.y-b.y], w=[d.x-b.x,d.y-b.y];
+ const dot=u[0]*w[0]+u[1]*w[1], nu=Math.hypot(...u), nw=Math.hypot(...w);
+ return Math.acos(Math.max(-1,Math.min(1,dot/(nu*nw))))*180/Math.PI;
+}
+function set(id,x){$(id).textContent=Number.isFinite(x)?Math.round(x):"—"}
+async function loop(){
+ if(!running)return;
+ if(v.readyState>=2 && v.currentTime!==last){
+  last=v.currentTime;c.width=v.videoWidth;c.height=v.videoHeight;
+  const r=pose.detectForVideo(v,performance.now()), lm=r.landmarks?.[0];
+  ctx.clearRect(0,0,c.width,c.height);
+  if(lm){
+   const du=new DrawingUtils(ctx);
+   du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{lineWidth:3});
+   du.drawLandmarks(lm,{radius:3});
+   set("le",ang(lm[11],lm[13],lm[15])); set("re",ang(lm[12],lm[14],lm[16]));
+   set("lk",ang(lm[23],lm[25],lm[27])); set("rk",ang(lm[24],lm[26],lm[28]));
+   const sh={x:(lm[11].x+lm[12].x)/2,y:(lm[11].y+lm[12].y)/2};
+   const hp={x:(lm[23].x+lm[24].x)/2,y:(lm[23].y+lm[24].y)/2};
+   const dx=sh.x-hp.x,dy=sh.y-hp.y; set("sp",Math.atan2(Math.abs(dx),Math.abs(dy))*180/Math.PI);
+   if(baseNose===null)baseNose=lm[0].x; set("hd",Math.abs(lm[0].x-baseNose)*100);
+  }
+ }
+ requestAnimationFrame(loop);
+}
+</script></body></html>
