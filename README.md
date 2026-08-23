@@ -1,16 +1,19 @@
-# v0.4 修正重點
+# 高爾夫揮桿分析 v0.5
 
-前版最可能的問題不是 MOV/MP4，而是 Safari 在頁面一開始載入 MediaPipe ES module 時失敗。
-一旦最上方 import 失敗，後面的「選檔事件」也完全不會執行，所以會出現：
-- iPhone 看得到檔名
-- 但按鈕仍然灰色
-- 狀態文字完全不改
+## 這版修正的錯誤
+v0.4 顯示：
+Failed to fetch dynamically imported module:
+https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm
 
-v0.4 已改成：
-1. 一般 JavaScript 先啟動。
-2. 選檔事件不依賴 MediaPipe。
-3. 選到任何影片後立即啟用按鈕。
-4. 只有按「開始分析」時才動態載入 MediaPipe。
-5. 新增「系統狀態」方便直接判斷卡在哪一步。
+原因是 Safari 無法成功抓取 jsDelivr 的 `+esm` 轉譯端點。
 
-GitHub Pages：用新版 index.html 覆蓋舊檔即可。
+## v0.5 改法
+改成 MediaPipe 官方瀏覽器 bundle：
+https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs
+
+Google 官方文件目前也建議以 `vision_bundle.mjs` 載入 MediaPipe Tasks Vision。
+
+## 更新方式
+只要用本版的 index.html 覆蓋 GitHub Pages 原本的 index.html。
+重新整理後頁面上方應顯示：
+v0.5｜MediaPipe CDN 修正版
