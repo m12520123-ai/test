@@ -1,19 +1,21 @@
-# 高爾夫揮桿分析 v0.5
+# 高爾夫揮桿分析 v0.6
 
-## 這版修正的錯誤
-v0.4 顯示：
-Failed to fetch dynamically imported module:
-https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm
+這版不再使用：
+- ES Module
+- dynamic import()
+- @mediapipe/tasks-vision
 
-原因是 Safari 無法成功抓取 jsDelivr 的 `+esm` 轉譯端點。
+改成舊版但成熟的 MediaPipe Pose classic script：
+- @mediapipe/pose
+- @mediapipe/drawing_utils
 
-## v0.5 改法
-改成 MediaPipe 官方瀏覽器 bundle：
-https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs
-
-Google 官方文件目前也建議以 `vision_bundle.mjs` 載入 MediaPipe Tasks Vision。
+目的：避開 iPhone Safari 出現
+`Importing a module script failed.`
 
 ## 更新方式
-只要用本版的 index.html 覆蓋 GitHub Pages 原本的 index.html。
-重新整理後頁面上方應顯示：
-v0.5｜MediaPipe CDN 修正版
+將 ZIP 解壓縮後，把 index.html 覆蓋 GitHub Pages 原本的 index.html。
+
+畫面上方應顯示：
+v0.6｜iPhone Safari 非 Module 版
+
+如果仍失敗，請把「系統狀態」那一行一起截圖。
