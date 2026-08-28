@@ -1,21 +1,14 @@
-# 高爾夫揮桿分析 v0.6
+Golf AI v0.7
 
-這版不再使用：
-- ES Module
-- dynamic import()
-- @mediapipe/tasks-vision
+新增三頁切換：
+- index.html：揮桿姿態分析
+- shot.html：擊球數據、Smash Factor、Carry、彈道示意、最近擊球紀錄
+- record.html：手機相機、3 秒倒數、自動錄影、錄影回放與儲存
 
-改成舊版但成熟的 MediaPipe Pose classic script：
-- @mediapipe/pose
-- @mediapipe/drawing_utils
+重要限制：
+手機單鏡頭無法像雷達彈道監測器一樣精準量測球速、桿速、旋轉量、Carry。
+v0.7 的擊球數據頁採手動輸入／未來外部硬體輸入。
+藍牙啟動需要特定裝置的 BLE 協定與硬體型號。
 
-目的：避開 iPhone Safari 出現
-`Importing a module script failed.`
-
-## 更新方式
-將 ZIP 解壓縮後，把 index.html 覆蓋 GitHub Pages 原本的 index.html。
-
-畫面上方應顯示：
-v0.6｜iPhone Safari 非 Module 版
-
-如果仍失敗，請把「系統狀態」那一行一起截圖。
+GitHub Pages 部署：
+請把 ZIP 內所有檔案一起上傳到專案根目錄，不要只換 index.html。

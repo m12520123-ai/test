@@ -1,0 +1,17 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>同步錄影</title><link rel="stylesheet" href="shared.css"></head><body><main class="wrap">
+<h1>🎥 同步錄影</h1><div class="sub">3 秒倒數後自動開始錄製揮桿</div>
+<nav class="nav"><a href="index.html">揮桿分析</a><a href="shot.html">擊球數據</a><a class="active" href="record.html">同步錄影</a></nav>
+<div class="notice">這版先做「3 秒倒數＋手機攝影機錄影」。參考圖中的「藍牙啟動」需要特定硬體的 BLE 通訊協定，不能只靠網頁憑空取得。</div>
+<section class="card"><label>鏡頭</label><select id="facing"><option value="environment">後鏡頭</option><option value="user">前鏡頭</option></select><div class="stage"><video id="preview" playsinline webkit-playsinline autoplay muted></video></div><div id="count" class="countdown"></div>
+<button id="camera">開啟相機</button><button id="record" disabled>3 秒後開始錄影</button><button id="stop" class="secondary" disabled>停止錄影</button><div id="status" class="status">尚未開啟相機。</div></section>
+<section class="card"><h3>剛剛的影片</h3><video id="playback" controls playsinline></video><a id="save" style="display:none"><button>儲存影片</button></a></section></main>
+<script>
+const $=id=>document.getElementById(id);let stream=null,rec=null,chunks=[];
+async function openCam(){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:$("facing").value}},audio:false});$("preview").srcObject=stream;$("record").disabled=false;$("status").textContent="相機已開啟。"}catch(e){$("status").textContent="無法開啟相機："+e.message}}
+$("camera").onclick=openCam;$("facing").onchange=()=>{if(stream)openCam()};
+$("record").onclick=async()=>{if(!stream)return;$("record").disabled=true;for(let n=3;n>=1;n--){$("count").textContent=n;await new Promise(r=>setTimeout(r,1000))}$("count").textContent="GO";setTimeout(()=>$("count").textContent="",500);chunks=[];
+let mime="";["video/mp4;codecs=h264","video/mp4","video/webm;codecs=vp9","video/webm"].some(m=>{if(MediaRecorder.isTypeSupported(m)){mime=m;return true}});
+try{rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined)}catch(e){rec=new MediaRecorder(stream)}
+rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};rec.onstop=()=>{const blob=new Blob(chunks,{type:rec.mimeType||"video/mp4"}),url=URL.createObjectURL(blob);$("playback").src=url;$("save").href=url;$("save").download="golf-swing."+(blob.type.includes("webm")?"webm":"mp4");$("save").style.display="block";$("status").textContent="錄影完成。"};rec.start();$("stop").disabled=false;$("status").textContent="錄影中…"};
+$("stop").onclick=()=>{if(rec&&rec.state!=="inactive")rec.stop();$("stop").disabled=true;$("record").disabled=false};
+</script></body></html>
