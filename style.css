@@ -71,3 +71,5 @@ button:disabled{opacity:.42}
 @media (min-width:700px){
   .stage{aspect-ratio:16/9}
 }
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.tabs a{text-decoration:none;text-align:center;padding:12px;border-radius:13px;background:#e8ece9;color:#17201a;font-weight:800}.tabs a.active{background:#17201a;color:#fff}
