@@ -1,25 +1,25 @@
-# SwingLab v2.1 測試紀錄
+# v2.2 Test report
 
-測試日期：2026-10-26
+Browser: Chromium 144.0.7559.96 (Playwright).
+Passed checks: 84 / 84.
 
-## 已執行
-- 8 個 JavaScript 檔案通過 node --check。
-- Chromium 中執行 29 項功能／流程驗證，加上 36 組頁面寬度檢查，共 65 項通過。
-- 寬度：360 / 390 / 430 / 768 / 1024 / 1440 px；六個分頁均無水平溢出。
-- 檢查 DOM 沒有重複 ID、原分頁保留、同頁切換正常。
-- 實際 MP4 解碼、時間跳轉、手動點選標記、速度校正與慢動作倍率。
-- 桿面方向差使用實際影像長寬比計算，未混入雷達欄位。
-- 錄影倒數、取消、停止、自動接回同頁回放、釋放相機軌道。
-- AI 模型失敗時，相機原始錄影仍可使用。
-- 儲存／重存／重新開啟影片及標記資料；重存不增加重複擊球。
-- 流程中未捕獲未處理的瀏覽器 JavaScript 例外。
+## Verified
+- Real synthetic H.264 MP4 loaded through a file input and decoded in the browser.
+- Touch-style pointer events placed ball/club/reference/direction marks on the canvas.
+- Current-clip path, interval speed, direction plots and summary cards updated together.
+- Known geometry: 100 cm reference = 320 px; club displacement = 64 px over 0.1 s gives 7.2 km/h (2D). A 4x slow-motion correction gives 28.8 km/h.
+- Missing calibration does not generate a speed. Direction uses the original image aspect ratio.
+- Point replacement, deletion and undo; CSV/JSON/annotated PNG downloads.
+- Single-frame and scan failures leave manual tools usable. Scan cancellation releases the UI immediately.
+- AI input is a frozen decoded frame rather than a mutable video element.
+- 30 responsive layout checks: 6 routes at 375/390/430/768/1440 px.
+- Save/reopen UI wiring restores analysis, without copying projected speed into radar fields.
 
-## 測試限制（不代表實機或量測認證）
-- 環境限制瀏覽器網路導航，測試採同一份 HTML/CSS/JS 內嵌渲染，非真實 GitHub Pages 部署驗收。
-- localStorage 與影片儲存介面在測試中使用記憶體代理。未測試 iPhone IndexedDB 配額和長期保存。
-- 攝影機輸入採 Canvas 產生的測試串流；錄影使用瀏覽器真實 MediaRecorder。不是實體鏡頭。
-- 姿態使用固定 landmark 測試資料與刻意失敗模型，未下載模型執行真實推論。
-- 測試注入只存在測試工具，沒有放入部署的 js/ 檔案。
-- 必須在使用者的 iPhone Safari 上驗收相機權限、真實模型載入、錄影格式、效能及存檔。
+## Not verified / test adapters
+Save/reopen tests used an in-memory adapter for the media store and localStorage because the browser content test harness has no persistent web origin. These tests do NOT certify native browser IndexedDB persistence, storage quota, or reload recovery. Native storage failure was separately injected to ensure no false success.
+AI failure and pending-work tests used a mocked pose model. They do NOT certify model loading or pose detection accuracy.
+No physical iPhone, Safari camera, real golf clip, radar or Bluetooth device was used.
+The supplied synthetic test video is not included in the application, and no synthetic measurements are automatically generated for user videos.
 
-完整通過項目見 qa_results.json。本測試不宣稱量測精度，也不是雷達或專業高爾夫儀器的比對驗證。
+## Distribution
+The deployed index.html is self-contained for UI/styles/application logic. Only on-demand MediaPipe assets still use a network connection. The source/ directory is for development, not required deployment.

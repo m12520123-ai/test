@@ -1,0 +1,498 @@
+{
+  "version": "2.2.0",
+  "browser": "144.0.7559.96",
+  "tests": [
+    {
+      "test": "App startup",
+      "pass": true,
+      "actual": "function",
+      "expected": "function"
+    },
+    {
+      "test": "Task before upload gives instruction",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "H264 video decoded",
+      "pass": true,
+      "actual": 3,
+      "expected": 3
+    },
+    {
+      "test": "Manual buttons enabled",
+      "pass": true,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "test": "No AI dependency for manual tools",
+      "pass": true,
+      "actual": "undefined",
+      "expected": "undefined"
+    },
+    {
+      "test": "Calibration starts blank",
+      "pass": true,
+      "actual": "",
+      "expected": ""
+    },
+    {
+      "test": "Touch annotations at two times",
+      "pass": true,
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "test": "Top summary linked to marks",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Bottom plot not empty",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Same time replaces a point instead of duplicate",
+      "pass": true,
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "test": "Scale input linked",
+      "pass": true,
+      "actual": "100",
+      "expected": "100"
+    },
+    {
+      "test": "Reference two endpoints",
+      "pass": true,
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "test": "Speed task advances to club marking",
+      "pass": true,
+      "actual": "club",
+      "expected": "club"
+    },
+    {
+      "test": "Correct pixel aspect-calibrated speed kmh",
+      "pass": true,
+      "actual": 7.200000000000002,
+      "expected": 7.2
+    },
+    {
+      "test": "Bottom speed curve available",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Video estimate does not invent radar shot",
+      "pass": true,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "test": "Slow-motion time correction",
+      "pass": true,
+      "actual": 28.800000000000008,
+      "expected": 28.8
+    },
+    {
+      "test": "Direction angle in non-square video",
+      "pass": true,
+      "actual": 29.357753542791215,
+      "expected": 29.357753542791276
+    },
+    {
+      "test": "Direction plot linked",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Undo clears incomplete direction output",
+      "pass": true,
+      "actual": null,
+      "expected": null
+    },
+    {
+      "test": "Playback progresses",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "CSV contains ball marks",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "JSON includes face geometry",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Annotated PNG exported",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Save builds one shot, with video association",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Save does not copy projection into Club Speed",
+      "pass": true,
+      "actual": null,
+      "expected": null
+    },
+    {
+      "test": "Reopen restores two ball points",
+      "pass": true,
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "test": "Reopen restores speed",
+      "pass": true,
+      "actual": 7.200000000000002,
+      "expected": 7.2
+    },
+    {
+      "test": "Reopen restores direction",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Delete a point from table",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "test": "Undo table deletion",
+      "pass": true,
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "test": "Model failure shown explicitly",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Model failure does not disable manual markers",
+      "pass": true,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "test": "Model failure does not disable exports",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "New video clears ball marks",
+      "pass": true,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "test": "New video clears speed",
+      "pass": true,
+      "actual": null,
+      "expected": null
+    },
+    {
+      "test": "New video clears direction",
+      "pass": true,
+      "actual": null,
+      "expected": null
+    },
+    {
+      "test": "New video keeps saved records",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "test": "Camera mode opens same page",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Back to video retains loaded video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "Original video page retained",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "test": "Return to flight mounts video once",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "test": "No duplicate IDs",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No uncaught page errors",
+      "pass": true,
+      "actual": [],
+      "expected": []
+    },
+    {
+      "test": "No horizontal overflow 390px overview",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 390px capture",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 390px video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 390px flight",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 390px history",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 390px settings",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px overview",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px capture",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px flight",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px history",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 375px settings",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px overview",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px capture",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px flight",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px history",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 430px settings",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px overview",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px capture",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px flight",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px history",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 768px settings",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px overview",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px capture",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px video",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px flight",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px history",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No horizontal overflow 1440px settings",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "test": "No late uncaught errors",
+      "pass": true,
+      "actual": [],
+      "expected": []
+    },
+    {
+      "test": "AI gets frozen decoded canvas, not mutable video",
+      "pass": true
+    },
+    {
+      "test": "Cancel releases manual tools immediately",
+      "pass": true
+    },
+    {
+      "test": "Cancel releases exports immediately",
+      "pass": true
+    },
+    {
+      "test": "Pending AI cannot be re-launched concurrently",
+      "pass": true
+    },
+    {
+      "test": "AI controls re-enabled when cancelled model task ends",
+      "pass": true
+    },
+    {
+      "test": "Failed storage does not create a successful saved shot",
+      "pass": true
+    },
+    {
+      "test": "Storage failure leaves JSON export usable",
+      "pass": true
+    },
+    {
+      "test": "No uncaught errors after failure paths",
+      "pass": true
+    },
+    {
+      "test": "Metadata stage exposes loaded source",
+      "pass": true
+    }
+  ],
+  "limitations": [
+    "Browser automation used an in-memory storage adapter because the set_content harness has an opaque origin. Native IndexedDB persistence was NOT verified.",
+    "Failure tests use a mocked pose model; real CDN/model inference and iPhone hardware were NOT tested.",
+    "Actual H264 decoding, DOM pointer interaction, canvas rendering, exports, and UI route transitions were tested.",
+    "Viewport checks are layout tests, not iOS Safari certification."
+  ]
+}
