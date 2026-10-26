@@ -240,7 +240,7 @@ async function migrate(){
 function init(){
  S.hydrate();fillClubs();
  rangeScene=new S.visuals.RangeScene($("rangeCanvas"));flightScene=new S.visuals.RangeScene($("flightCanvas"));
- S.review.init();S.live.init();S.flight.init();S.feedback.init();S.automation.init();
+ S.review.init();S.live.init();S.flight.init();S.feedback.init();S.automation.init();S.session.init();S.launch.init();
  document.querySelectorAll('[data-action="new-shot"]').forEach(b=>b.onclick=()=>showShot());
  $("demoToggle").onclick=()=>{S.state.demo=!S.state.demo;S.state.selected=null;S.state.comparison.clear();refresh();};$("leaveDemo").onclick=()=>{S.state.demo=false;S.state.selected=null;S.state.comparison.clear();refresh();};
  $("overviewClub").onchange=e=>{S.state.filterClub=e.target.value;renderOverview();};

@@ -1,18 +1,17 @@
-# SwingLab V2.3 verification scope
+# V2.4 test report
 
-## Passed
-- 10 pure logic checks: aspect-ratio-correct wrist projection, slow-motion scaling, low-confidence rejection, missing-pose gaps, stationary/empty cases, experimental bright-object candidates, no radar fields.
-- 22 Chromium flow assertions: auto-first default, upload auto-start, decoded synthetic-video analysis, charts, cancel/unlock, save-payload handoff, camera-to-recorded-clip handoff, and explicit model-download failure.
-- JavaScript syntax check for every production source file.
-- Mobile 390 x 844 overflow check and visual review. Desktop flow rendered at 1440 x 1000.
+48 assertions passed in the final runs. These are engineering checks, not validation of launch-monitor accuracy.
 
-## How the browser tests ran
-Browser navigation was blocked by the environment. The bundled HTML was executed using Playwright set_content on a blank document. Pose outputs, camera input, localStorage and media persistence were test doubles. The camera double supplied a real CanvasCaptureMediaStream to MediaRecorder, so recording and recorded-video decoding were exercised, but this was not a phone camera. Video input was a generated white-object fixture, not the user's footage.
+## Tested
+- 17 pure logic assertions: address/swing/settle segmentation, quiet scenes, tracking loss, slow-motion timing, scale and aspect geometry, invalid or unconfirmed tracks, analytic no-drag comparison and drag behavior.
+- 10 browser shell assertions: six routes, three viewport widths (390 / 768 / 1440), no JavaScript exceptions.
+- 13 uploaded-video assertions: an H.264 synthetic white-ball clip, calibration and candidate confirmation gates, high-rate search, known synthetic velocity and angle, model view switching, saving/restoring the model through an in-memory storage double, and clearing stale results after a new upload.
+- 8 continuous-practice assertions: synthetic pose events and a real MediaRecorder encoding a generated Canvas stream, two independent recordings, clip bounds, replay decoding and per-swing cards.
 
-## NOT verified
-- Real MediaPipe network download or inference in this environment.
-- Actual iPhone/Safari camera permissions, recording performance or frame rate.
-- Production IndexedDB persistence (only the save payload and callback flow were exercised).
-- Golf-ball identification accuracy, clubhead tracking, radar-like ball flight, true clubhead speed or face angle.
+## Test environment and limits
+Chromium under Playwright. The app was inserted into an in-memory document because network navigation is restricted in the test environment. Browser persistence was substituted with an in-memory store. Camera permission, getUserMedia hardware capture, iPhone Safari codecs/storage quotas, MediaPipe CDN/model execution and real golf-video accuracy were NOT validated. Continuous segmentation uses generated pose samples, not a real golf-action recognition benchmark. Optical tracking uses an ideal synthetic white circle on a static background; this does NOT establish real-world accuracy or robustness.
 
-The experimental tracker only associates small bright components. Its candidates must not be presented as confirmed golf-ball tracks. Production code contains no test-pose or camera stubs.
+The UI will reject insufficient evidence instead of fabricating measurements. A user confirmation is required before treating a bright-object track as a ball.
+
+## Reproduce
+The tests/ directory includes Node and Python test programs and the small synthetic H.264 fixture. Run `node tests/core.test.cjs` for pure logic. Browser tests require Python Playwright and an available Chromium browser. They intentionally use in-memory storage doubles and do not contact the user's accounts or websites.

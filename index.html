@@ -6,7 +6,7 @@
 <meta content="#0b1313" name="theme-color"/><meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="SwingLab" name="apple-mobile-web-app-title"/>
 <meta content="手機高爾夫姿態分析、影片標記、練習紀錄與彈道資料視覺化。" name="description"/>
-<title>SwingLab V2.3 - 自動揮桿分析</title>
+<title>SwingLab V2.4 - 自動揮桿分析</title>
 <link href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgcng9IjMwIiBmaWxsPSIjYzhmNTZhIi8+PHBhdGggZD0iTTkyIDM2QzczIDI1IDQ0IDI3IDM4IDQ0Yy03IDIwIDQ0IDE1IDQ3IDMyIDMgMTgtMzEgMjktNTEgMTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE0MmIyMCIgc3Ryb2tlLXdpZHRoPSIxMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTgyIDM1bDIwLTExIiBzdHJva2U9IiMxNDJiMjAiIHN0cm9rZS13aWR0aD0iOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+" rel="icon" type="image/svg+xml"/>
 <style>
 :root{--bg:#0b1213;--surface:#121c1e;--surface2:#182326;--line:#263436;--muted:#8d9d9f;--text:#eff5f1;--lime:#c8f56a;--green:#66dcb2;--cyan:#80cbd8;--danger:#f19688;--r:20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;color-scheme:dark}
@@ -71,15 +71,33 @@
 .auto-advanced{border:1px solid #2d4243;border-radius:12px;padding:13px;margin:16px 0;background:#101e20;min-width:0}.auto-advanced>summary{cursor:pointer;color:#b0c7ba;display:flex;justify-content:space-between;gap:10px;font-size:12px;list-style:none}.auto-advanced>summary:before{content:'+';font-weight:700}.auto-advanced[open]>summary:before{content:'-';}.auto-advanced summary small{margin-left:auto;font-size:9px;color:#7b9587}.auto-advanced[open]>summary{margin-bottom:16px}.auto-advanced .panel{padding:14px}.auto-advanced .review-results{margin-top:0}.flight-summary{display:none!important}.flight-context:not(.error){display:none}.flight-steps{display:none}#autoStatus.error{color:#ffb49f}#autoResults{scroll-margin-top:20px}
 @media(max-width:720px){.auto-workbench{padding:14px;margin-top:10px}.auto-intro h2{font-size:17px}.auto-intro .chip{display:none}.auto-workbench>p{font-size:12px}.auto-options{display:grid;gap:10px}.auto-kpis{grid-template-columns:1fr 1fr}.auto-kpis>div:last-child{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}.auto-kpis>div:last-child b{margin:0;font-size:22px}.auto-kpis b{font-size:23px}.auto-kpis small{font-size:9px}.auto-chart-grid{grid-template-columns:1fr}.auto-advanced{padding:11px}.auto-candidates{padding:12px}.auto-intro .eyebrow{font-size:9px}.auto-actions .btn{font-size:12px}.auto-advanced>summary{font-size:11px}.auto-angle-summary{grid-template-columns:1fr 1fr}.auto-angle-summary b{font-size:16px}.flight-workbench{margin-bottom:12px}.flight-boundary{font-size:11px}.auto-results>.panel-top h2{font-size:17px}}
 .auto-workbench .auto-options label{flex-direction:row;justify-content:flex-start;align-items:center;text-align:left}.auto-workbench .auto-timing{flex-direction:row}.auto-workbench .auto-options input{margin:0}.auto-workbench .status-line{min-height:0}
+/* v2.4 capture and calibrated-flight extensions */
+.practice-panel,.launch-panel{border:1px solid #3a5042;margin-top:18px;background:linear-gradient(145deg,#162423,#10191d)}
+.practice-panel .panel-top h2,.launch-panel .panel-top h2{font-size:21px}.check-row{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#c4d3cb;line-height:1.7;margin:12px 0}.check-row input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--lime);margin:2px 0 0}
+.practice-panel .control-row,.launch-panel .control-row{flex-wrap:wrap;gap:8px;margin-top:12px}
+.practice-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.practice-shot{display:flex;align-items:flex-start;gap:12px;background:#0e1b1e;border:1px solid #294039;border-radius:14px;padding:12px;min-width:0}
+.practice-shot img{width:76px;height:86px;border-radius:8px;object-fit:cover}.practice-shot>div{min-width:0}.practice-shot strong{font-size:15px}.practice-shot p{font-size:12px;margin:5px 0}.practice-shot small{font-size:11px;color:#c8d5a7}.practice-shot .control-row{gap:5px}
+.launch-intro{line-height:1.7;color:#b8c9c1}.launch-banner{padding:12px 14px;border-radius:12px;border:1px solid #66582c;background:#38321d;font-size:13px;color:#e7d6a1;line-height:1.7;margin:14px 0}.launch-setup{border:1px solid #2c413d;border-radius:14px;padding:14px;background:#101b1d}
+.launch-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.launch-fields label{min-width:0;font-size:12px;color:#9cafaa;display:flex;flex-direction:column;gap:7px}.launch-fields input,.launch-fields select{width:100%;max-width:100%;min-width:0}
+.launch-overlay{position:absolute!important;inset:0;width:100%;height:100%;z-index:8;pointer-events:none}
+.launch-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}
+.launch-kpis>div{background:#101e20;border:1px solid #2b403a;border-radius:14px;padding:14px 12px;min-width:0}.launch-kpis span{display:block;font-size:12px;color:#b3c5bf}.launch-kpis b{display:block;font-size:26px;color:#d6f1a7;margin:8px 0;font-weight:650}.launch-kpis small{font-size:10px;line-height:1.5;display:block;color:#a3b4a8}
+.launch-range{height:320px;position:relative;border-radius:14px;overflow:hidden}.launch-watermark{position:absolute;top:12px;left:12px;max-width:calc(100% - 24px);font-size:11px}.launch-method{border-top:1px solid #30413d;padding-top:12px;margin-top:16px}.launch-method p{color:#96ada3;font-size:13px;line-height:1.8}.launch-method summary{font-size:13px;cursor:pointer}
+#launchCandidates{margin:16px 0;padding:14px;border-radius:12px;background:#202236}#launchCandidates label:first-child{display:flex;gap:12px;align-items:center}#uploadedSwings{display:flex;flex-wrap:wrap;gap:8px}#uploadedSwings p{flex-basis:100%}.error{color:#f4a697}
+@media(max-width:1000px){.practice-shots{grid-template-columns:1fr}.launch-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.launch-panel,.practice-panel{padding:14px}.launch-kpis{gap:6px}.launch-kpis b{font-size:21px}.launch-kpis>div{padding:12px 7px}.launch-kpis span{font-size:11px}.launch-range{height:270px}.launch-panel .control-row>.btn{flex:1;white-space:normal}.practice-shot .btn{padding:7px 9px}.launch-setup{padding:10px}}
+
+.practice-panel label.check-row,.launch-panel label.check-row{display:flex;flex-direction:row;align-items:flex-start;grid-template-columns:none}.practice-panel label.check-row input,.launch-panel label.check-row input{flex:0 0 18px;width:18px;height:18px}
 </style>
-<script>window.SWINGLAB_BUILD="2.3.0-auto-first";</script></head>
+</head>
 <body>
 <div id="app">
 <aside class="sidebar">
 <a aria-label="SwingLab 首頁" class="brand" href="#flight"><span class="brand-mark">S<span></span></span><span>SWING<span class="brand-light">LAB</span><small>GOLF ANALYTICS STUDIO</small></span></a>
 <div class="side-label">YOUR PRACTICE, REDEFINED</div>
 <nav aria-label="主要功能" class="desktop-nav"></nav>
-<div class="sidebar-bottom"><span class="connection-dot"></span>本機分析 · 資料由你掌握<small>STUDIO EDITION / V2.3</small></div>
+<div class="sidebar-bottom"><span class="connection-dot"></span>本機分析 · 資料由你掌握<small>STUDIO EDITION / V2.4</small></div>
 </aside>
 <main class="main">
 <header class="topbar"><div class="mobile-brand"><span class="brand-mark">S<span></span></span><b>SWINGLAB</b></div><div class="breadcrumb"><span>WORKSPACE</span><span class="slash">/</span><b id="breadcrumb">練習總覽</b></div><div class="header-actions"><span class="chip subtle" id="sourceChip">本機資料</span><button class="btn ghost small" id="demoToggle" type="button">體驗示範</button><a aria-label="設定" class="avatar" href="#settings">SL</a></div></header>
@@ -109,7 +127,7 @@
 </section>
 <section aria-label="影片分析" class="page" hidden="" id="page-video">
 <div class="video-layout"><div><div class="panel" id="reviewMainPanel"><div class="panel-top"><div><span class="eyebrow">REPLAY &amp; REVIEW</span><h2>上傳影片，直接分析。</h2></div><label class="btn primary small file-button"><span data-icon="upload"></span>選擇影片<input accept="video/*,.mp4,.mov" hidden="" id="videoFile" type="file"/></label></div><div class="review-workflow" id="reviewWorkflow">
-<div class="workflow-heading"><strong>這支影片，要看什麼？</strong><span class="chip accent">V2.3</span></div>
+<div class="workflow-heading"><strong>這支影片，要看什麼？</strong><span class="chip accent">V2.4</span></div>
 <p id="reviewReadyHint" role="status">先選擇影片，再選一個分析項目。</p>
 <div class="task-grid">
 <button data-go-task="ball"><b>01 球路</b><small id="taskBallState">逐點標記影像軌跡</small></button>
@@ -139,13 +157,13 @@
 </section>
 <section aria-label="自動分析" class="page" hidden="" id="page-flight">
 <div class="flight-workbench">
-<div class="flight-intro"><div><p class="eyebrow">CAPTURE. TRACE. UNDERSTAND.</p><h2>選影片，或直接開相機。</h2><p>不用先手動標記，先讓程式掃描能辨識的動作。</p></div><span class="chip accent">STUDIO 2.3</span></div>
+<div class="flight-intro"><div><p class="eyebrow">CAPTURE. TRACE. UNDERSTAND.</p><h2>選影片，或直接開相機。</h2><p>不用先手動標記，先讓程式掃描能辨識的動作。</p></div><span class="chip accent">STUDIO 2.4</span></div>
 <div aria-label="影像來源" class="flight-mode-tabs" role="tablist">
 <button aria-controls="flightReviewHost" aria-selected="true" class="active" data-mode="video" id="flightModeVideo" role="tab"><span data-icon="upload"></span><span><b>上傳影片</b><small>載入後自動掃描</small></span></button>
 <button aria-controls="flightCaptureHost" aria-selected="false" data-mode="camera" id="flightModeCamera" role="tab" tabindex="-1"><span data-icon="camera"></span><span><b>手機相機</b><small>即時姿態＋同步錄影</small></span></button>
 </div>
 <div class="flight-steps"><span><b>01</b>選擇來源</span><span><b>02</b>回放定位</span><span><b>03</b>標記與校正</span><span><b>04</b>保存分析</span></div>
-<p class="flight-boundary">自動：人體、手部軌跡、移動曲線。球路僅實驗性候選。桿頭速度、真實桿面角尚未自動量測。</p>
+<p class="flight-boundary">新增：連續揮桿分段＋逐球紀錄。影像初速需側拍校正與球路確認；3D 距離為模擬，非實測 Carry。</p>
 </div>
 <div class="flight-summary" hidden="" id="flightSummary">
 <div><span>本段影片</span><strong id="flightClipLength">—</strong><small id="flightClipSource">尚未載入</small></div>
@@ -176,7 +194,7 @@
 <div class="panel"><div class="panel-top"><div><span class="eyebrow">PRIVATE BY DESIGN</span><h2>資料保管</h2></div></div><p class="hint readable">擊球資料保存在本機瀏覽器，影片使用 IndexedDB 儲存。清除網站資料、瀏覽器回收空間、或換裝置，都可能遺失內容。JSON 備份只含擊球數據；影片與逐幀分析 JSON 請另外下載。</p><div class="control-row"><button class="btn secondary" id="requestPersistence">請求保留儲存空間</button><button class="btn secondary" id="migrateLegacy">讀取舊版紀錄</button></div><div class="status-line" id="storageInfo">正在檢查本機儲存空間…</div><hr/><button class="btn danger full" id="clearAll">刪除本機 SwingLab 紀錄</button></div></div>
 <div class="panel"><div class="panel-top"><h2>功能與量測邊界</h2><span class="chip">不混淆示意與實測</span></div><div class="boundary-grid"><div><b>手機直接可用</b><p>即時人體骨架、2D 關節角度、同步原始錄影、影片回放、逐時點標記、比較與匯出。</p></div><div><b>需要校正或輸入</b><p>2D 桿頭投影速度要有尺度和時間校正。球路線由逐幀點選；3D 彈道是根據數據的示意重建。</p></div><div><b>仍需外部量測</b><p>可靠的球速、旋轉、桿面角與完整彈道數據需合適感測設備與協定，本版提供輸入、匯入和視覺化。</p></div></div></div>
 </section>
-<footer class="footer"><span>SWINGLAB / STUDIO 2.3</span><span>觀察動作，記錄進步。<span class="footer-dot">·</span>非專業雷達替代品</span></footer>
+<footer class="footer"><span>SWINGLAB / STUDIO 2.4</span><span>觀察動作，記錄進步。<span class="footer-dot">·</span>非專業雷達替代品</span></footer>
 </main><nav aria-label="手機功能選單" class="mobile-nav"></nav>
 </div>
 <div class="modal-backdrop" hidden="" id="shotModal"><section aria-labelledby="shotModalTitle" aria-modal="true" class="modal" role="dialog"><div class="modal-header"><div><p class="eyebrow">SHOT DETAILS</p><h2 id="shotModalTitle">新增一球</h2></div><button aria-label="關閉" class="icon-btn modal-close"><span data-icon="close"></span></button></div><form id="shotForm"><div class="modal-body"><div class="notice neutral">這裡是手動輸入或外部數據。未提供的欄位留白，不會從人體姿態自動補值。</div><input id="shotID" type="hidden"/><div class="control-row"><label>球桿<select class="club-options" id="formClub"></select></label><label>日期時間<input id="formDate" required="" type="datetime-local"/></label></div><div class="input-metrics" id="shotFields"></div><label>備註<textarea id="formNotes" maxlength="500" placeholder="球路、手感，或本球想改善的地方" rows="2"></textarea></label><p class="error-text" id="shotFormError"></p></div><div class="modal-footer"><button class="btn secondary modal-close" type="button">取消</button><button class="btn primary" type="submit">儲存這一球</button></div></form></section></div>
@@ -361,8 +379,10 @@ class RangeScene{
   for(let i=0;i<=maxI;i++){
     const t=i/100;
     const side=S.finite(shot.launchDir)?shot.offline*t*t+Math.tan(shot.launchDir*Math.PI/180)*shot.carry*t*(1-t):shot.offline*t;
-    const high=canArc?4*shot.apex*t*(1-t):0;
-    pts.push(project(side,shot.carry*t,high));shadow.push(project(side,shot.carry*t,0));
+    const modelPoint=shot.modelPath?.[Math.min(shot.modelPath.length-1,Math.round(t*(shot.modelPath.length-1)))];
+    const high=modelPoint?modelPoint.z:(canArc?4*shot.apex*t*(1-t):0);
+    const forward=modelPoint?modelPoint.x:shot.carry*t;
+    pts.push(project(side,forward,high));shadow.push(project(side,forward,0));
   }
   if(canArc&&pts.length>1){
     ctx.setLineDash([3,5]);path(ctx,shadow,null,"#0d231b99",1,false);ctx.setLineDash([]);
@@ -569,7 +589,7 @@ function summarize(samples,width,height,slowRatio=1){
 /* Experimental bright-object tracker. Finds candidates, not golf-ball identities.
    No learned golf detector, no prediction through occlusion and no extrapolation. */
 class BrightTracker{
- constructor(){this.previous=null;this.width=0;this.height=0;this.tracks=[];this.frame=0;this.nextID=0;this.unstable=0;}
+ constructor(options={}){this.speedLimit=options.fast?10000:500;this.predictLimit=options.fast?6000:320;this.previous=null;this.width=0;this.height=0;this.tracks=[];this.frame=0;this.nextID=0;this.unstable=0;}
  feed(image,t){
   const {data,width:w,height:h}=image,n=w*h,gray=new Uint8Array(n),mask=new Uint8Array(n);let changed=0;
   if(this.width!==w||this.height!==h){this.previous=null;this.tracks=[];this.width=w;this.height=h;}
@@ -602,7 +622,7 @@ class BrightTracker{
    if(elapsed<=0||elapsed>.45)continue;
    let px=last.x,py=last.y;if(before&&last.t>before.t){const mult=elapsed/(last.t-before.t);px+=(last.x-before.x)*mult;py+=(last.y-before.y)*mult;}
    for(let i=0;i<objects.length;i++){const p=objects[i];const dist=Math.hypot((p.x-last.x)*w,(p.y-last.y)*h),err=Math.hypot((p.x-px)*w,(p.y-py)*h),ar=p.area/last.area;
-    if(dist>Math.min(w*.23,25+elapsed*500)||ar<.25||ar>4||err>Math.min(w*.2,24+elapsed*320))continue;
+    if(dist>Math.min(w*.23,25+elapsed*this.speedLimit)||ar<.25||ar>4||err>Math.min(w*.2,24+elapsed*this.predictLimit))continue;
     pairs.push({tr,i,cost:err+Math.abs(Math.log(ar))*8});
    }
   }
@@ -612,7 +632,7 @@ class BrightTracker{
   if(this.tracks.length>700)this.tracks=this.tracks.filter(a=>a.points.length>=4||this.frame-a.lastFrame<=2).slice(-700);
   this.previous=gray;
  }
- results(){
+ results(limit=3){
   const out=[];
   for(const tr of this.tracks){
    const p=tr.points;if(p.length<5)continue;
@@ -622,7 +642,7 @@ class BrightTracker{
    if(travel<20||chord<12||moves<3||travel/Math.max(chord,1)>2.8||maxStep>this.width*.23)continue;
    out.push({id:tr.id,points:p.map(q=>({x:q.x,y:q.y,t:q.t})),observations:p.length,travelPixels:travel,label:'unconfirmed-bright-object',score:Math.min(p.length,40)+Math.min(chord,100)/5});
   }
-  return out.sort((a,b)=>b.score-a.score).slice(0,3).map(({score,...r})=>r);
+  return out.sort((a,b)=>b.score-a.score).slice(0,limit).map(({score,...r})=>r);
  }
 }
 const api={summarize,BrightTracker,wrist};
@@ -635,12 +655,12 @@ if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.SL.a
 "use strict";
 const S=window.SL,$=S.$,P=S.pose;
 let v,c,ctx,currentFile=null,url=null,token=0,scanToken=0,scanning=false,tool="none",baseline=null,loaded=false,shotId=null,source="video";
-let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false,automatic=null,knownDuration=null;
+let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false,automatic=null,knownDuration=null,launchAnalysis=null,clipWindow=null;
 let samples=[],marks={ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]},phases={},undo=[],pending=[],seekBusy=false,paintRAF=0;
 const emptyMarks=()=>({ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]});
 function status(t,error=false){$("videoStatus").textContent=t;$("videoStatus").className="status-line"+(error?" error":"");}
 function duration(){return Number.isFinite(v?.duration)&&v.duration>0?v.duration:knownDuration;}
-function info(){return{duration:duration(),view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),automatic,schema:"swinglab.analysis.v2.3"};}
+function info(){return{duration:duration(),view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),automatic,launchAnalysis,clipWindow,schema:"swinglab.analysis.v2.4"};}
 function controls(){
  const lock=!loaded||scanning;
  ["markNext","finishMarks","undoAnnotation","clearAnnotations","resultSave","exportMarksCSV"].forEach(id=>{if($(id))$(id).disabled=lock;});
@@ -653,10 +673,10 @@ function controls(){
  if($("cancelAnalysis"))$("cancelAnalysis").hidden=!scanning&&!frameBusy;
 }
 async function load(file,options={}){
- if(!file)return;
+ if(!file)return;S.launch?.cancel();
  if(!(file instanceof Blob)||file.size===0){status("選到的影片是空檔案。",true);return;}
  cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";knownDuration=Number.isFinite(options.duration)&&options.duration>0?options.duration:options.analysis?.duration||null;currentClub=options.club||S.state.shots.find(s=>s.id===shotId)?.club||"7I";
- automatic=null;samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
+ automatic=null;launchAnalysis=null;clipWindow=null;samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
  $("scaleCm").value="";$("slowRatio").value="1";$("playbackRate").value="1";v.playbackRate=1;
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);v.src=url;
  $("videoPlaceholder").hidden=true;$("reviewStage").classList.remove("marking");$("videoFile").value="";
@@ -666,7 +686,7 @@ async function load(file,options={}){
   await S.waitMetadata(v);if(my!==token)return;
   loaded=true;const analysis=options.analysis;
   if(analysis){
-   automatic=analysis.automatic||null;
+   automatic=analysis.automatic||null;launchAnalysis=analysis.launchAnalysis||null;clipWindow=analysis.clipWindow||null;
    samples=Array.isArray(analysis.samples)?analysis.samples:[];marks=analysis.marks?{...emptyMarks(),...analysis.marks}:emptyMarks();phases=analysis.phases||{};
    if(["face","dtl"].includes(analysis.view))$("videoView").value=analysis.view;
    $("scaleCm").value=analysis.scaleCm??"";$("slowRatio").value=String(analysis.slowRatio||1);
@@ -674,6 +694,7 @@ async function load(file,options={}){
   $("clipEnd").value=Math.min(5,Number.isFinite(v.duration)?v.duration:5).toFixed(2);$("clipStart").value="0";
   $("videoSeek").max=Number.isFinite(v.duration)?v.duration:1;
   status(`影片已就緒 · ${v.videoWidth} × ${v.videoHeight} · ${Number.isFinite(v.duration)?v.duration.toFixed(2):"未知"} 秒。${samples.length?"已有 "+samples.length+" 筆姿態資料。":""}`);
+  if(clipWindow){v.currentTime=Math.max(0,clipWindow.start||0);$("clipStart").value=clipWindow.start.toFixed(2);$("clipEnd").value=clipWindow.end.toFixed(2);}
   controls();renderPhases();draw();updateEstimate();syncTime();S.emit("review-loaded",meta());S.emit("review-ready",{...meta(),restored:!!analysis});
  }catch(e){if(my===token){status(e.message,true);controls();S.emit("review-loaded",meta());}}
 }
@@ -803,7 +824,7 @@ async function runFrozen(notify){
  try{return await P.run(image,notify);}finally{aiPending=false;controls();}
 }
 async function analyzeFrame(){
- if(!loaded||scanning||frameBusy||aiPending)return;
+ if(!loaded||scanning||frameBusy||aiPending||S.launch?.isBusy())return;
  v.pause();const my=token,ft=++frameToken,t=v.currentTime;frameBusy=true;controls();
  try{
   const lm=await runFrozen(msg=>{if(ft===frameToken)status(msg);});if(my!==token||ft!==frameToken)return;
@@ -815,10 +836,10 @@ async function analyzeFrame(){
  }catch(e){if(ft===frameToken)status(e.message,true);}finally{frameBusy=false;controls();S.emit("review-changed");}
 }
 async function scan(options={}){
- if(!loaded||scanning||frameBusy||aiPending)return;
+ if(!loaded||scanning||frameBusy||aiPending||S.launch?.isBusy())return;
  const auto=options.automatic===true;
- const start=auto?0:S.num($("clipStart").value),end=auto?duration():S.num($("clipEnd").value);
- let fps=auto?Math.min(15,900/Math.max(end,1)):S.num($("sampleFPS").value)||15;
+ const start=auto?(clipWindow?.start||0):S.num($("clipStart").value),end=auto?(clipWindow?.end||duration()):S.num($("clipEnd").value);
+ let fps=auto?Math.min(15,900/Math.max(end-start,1)):S.num($("sampleFPS").value)||15;
  if(start===null||end===null||start<0||end<=start||!Number.isFinite(duration())||end>duration()+.01){status("\u5f71\u7247\u9577\u5ea6\u7121\u6548\uff0c\u8acb\u5148\u78ba\u8a8d\u53ef\u4ee5\u64ad\u653e\u3002",true);return;}
  if(auto&&end>120){status("\u81ea\u52d5\u6a21\u5f0f\u652f\u63f4 120 \u79d2\u5167\u77ed\u7247\u3002\u8acb\u5148\u88c1\u5207\u55ae\u6b21\u63ee\u687f\uff0c\u6216\u4f7f\u7528\u9032\u968e\u5340\u6bb5\u6383\u63cf\u3002",true);return;}
  const count=Math.min(900,Math.ceil((end-start)*fps));
@@ -902,10 +923,10 @@ function init(){
  $("videoFile").addEventListener("change",e=>{const f=e.target.files?.[0];if(f)load(f);});
  $("analyzeVideo").onclick=analyzeFrame;$("analyzeClip").onclick=scan;$("cancelAnalysis").onclick=()=>{cancelScan();status("已取消掃描，標記、播放與匯出已解鎖。AI 請求若仍在處理，會在結束後才能再按分析。");};
  $("stepBack").onclick=()=>step(-1);$("stepNext").onclick=()=>step(1);
- $("togglePlayback").onclick=async()=>{if(!loaded)return;if(tool!=="none")chooseTool("none");if(v.paused){try{await v.play();}catch(e){status("播放失敗："+e.message,true);}}else v.pause();};
+ $("togglePlayback").onclick=async()=>{if(!loaded)return;if(tool!=="none")chooseTool("none");if(v.paused){try{if(clipWindow&&(v.currentTime>=clipWindow.end-.03||v.currentTime<clipWindow.start))await S.seek(v,clipWindow.start);await v.play();}catch(e){status("播放失敗："+e.message,true);}}else v.pause();};
  $("videoSeek").addEventListener("input",()=>{if(loaded&&!scanning){v.pause();v.currentTime=Number($("videoSeek").value);}});
  $("playbackRate").onchange=()=>v.playbackRate=Number($("playbackRate").value);
- v.addEventListener("timeupdate",()=>{syncTime();if(v.paused)draw();});v.addEventListener("seeked",()=>{syncTime();draw();});
+ v.addEventListener("timeupdate",()=>{if(clipWindow&&!v.paused&&v.currentTime>=clipWindow.end)v.pause();syncTime();if(v.paused)draw();});v.addEventListener("seeked",()=>{syncTime();draw();});
  v.addEventListener("play",playbackDraw);v.addEventListener("pause",()=>{cancelAnimationFrame(paintRAF);syncTime();draw();});
  v.addEventListener("error",()=>{status("影片解碼失敗。請改用瀏覽器可播放的格式；副檔名不代表編碼。",true);});
  $("annotationTools").addEventListener("click",e=>{const b=e.target.closest("[data-tool]");if(b&&!b.disabled)chooseTool(b.dataset.tool);});
@@ -934,7 +955,7 @@ function confirmCandidate(index){
  const candidate=automatic?.candidates?.[index];if(!candidate||scanning)return;
  saveUndo();marks.ball=candidate.points.map(p=>({...p,source:"user-confirmed-experimental-track"}));draw();updateEstimate();
 }
-S.review={init,load,save,draw,getAutomatic:()=>automatic,confirmCandidate,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
+S.review={getVideo:()=>v,getFile:()=>currentFile,setLaunchAnalysis:r=>{launchAnalysis=r;S.emit("review-changed");},init,load,save,draw,getAutomatic:()=>automatic,confirmCandidate,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();S.launch?.cancel();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
 })();
 
 </script>
@@ -948,12 +969,12 @@ let recorder=null,recState="idle",countToken=0,chunks=[],recSamples=[],recStart=
 function status(msg,error=false){$("liveStatus").textContent=msg;$("liveStatus").className="status-line"+(error?" error":"");}
 function setState(text){$("liveState").textContent=text;}
 function updateControls(){
- const has=!!stream,busy=recState!=="idle";
+ const has=!!stream,busy=recState!=="idle"||!!S.session?.active();
  $("openCamera").disabled=opening||has;
  $("stopCamera").disabled=!has&&!opening;
  $("cameraFacing").disabled=opening||busy||has;
  $("liveView").disabled=busy;$("liveClub").disabled=busy;
- $("recordButton").disabled=(recState==="idle"&&(!has||!window.MediaRecorder))||recState==="stopping";
+ $("recordButton").disabled=(recState==="idle"&&(!has||!window.MediaRecorder))||recState==="stopping"||!!S.session?.active();
  $("recordButton").classList.toggle("recording",recState==="recording");
  $("recordButton").innerHTML=recState==="countdown"?"取消倒數":recState==="recording"?"停止錄影":recState==="stopping"?"正在整理影片…":"<i></i>3 秒倒數錄影";
  $("resetBaseline").disabled=!has||!aiReady;
@@ -971,7 +992,7 @@ async function open(){
   $("livePlaceholder").hidden=true;baseline=null;aiReady=false;lastLm=null;
   setState("相機就緒 · AI 載入中");updateControls();status("相機已開啟，正在載入人體模型。");
   s.getVideoTracks()[0].addEventListener("ended",()=>{if(stream){close();status("相機串流已中斷，請重新開啟。",true);}},{once:true});
-  loop(my);
+  S.emit("camera-ready",{settings:stream.getVideoTracks()[0].getSettings()});loop(my);
  }catch(e){
   if(my!==runToken)return;
   const friendly={NotAllowedError:"未取得相機權限。請在 Safari 的網站設定允許相機。",NotFoundError:"找不到可用鏡頭。",NotReadableError:"鏡頭可能被另一個程式占用，請關閉後重試。"};
@@ -988,30 +1009,33 @@ async function loop(my){
   aiReady=true;lastLm=lm;
   if(lm&&baseline===null&&P.valid(lm[0]))baseline=lm[0].x;
   const m=P.metrics(lm,frameWidth,frameHeight,baseline);
+  S.emit("live-pose",{t:captureTime/1000,lm,metrics:m,width:frameWidth,height:frameHeight});
   const ctx=P.setupOverlay(canvas);P.draw(ctx,lm,P.fit(video,canvas));P.renderMetrics($("liveMetrics"),m,$("liveView").value);
   const fps=1000/Math.max(1,performance.now()-began);
   $("liveFPS").textContent=`AI ${Math.min(fps,12).toFixed(1)} 次／秒`;
   if(recState==="recording"&&captureTime>=recStart)recSamples.push({t:(captureTime-recStart)/1000,lm,metrics:m});
-  setState(recState==="recording"?"REC · AI LIVE":"AI LIVE");
+  setState(recState==="recording"?"REC · AI LIVE":S.session?.active()?"AUTO REC · AI LIVE":"AI LIVE");
   status(lm?(recState==="recording"?"錄製原始影片中，同步保留姿態資料；時間對齊為近似值。":"人體姿態已偵測；被遮住或低信心的關節不顯示數值。"):"目前未取得可靠人體姿態，請讓全身清楚入鏡。");
   updateControls();
  }catch(e){
-  if(my===runToken){aiReady=false;status("姿態分析停止："+e.message,true);setState("相機開啟 · AI 失敗");updateControls();}return;
+  if(my===runToken){S.emit("live-ai-error",{message:e.message});aiReady=false;status("姿態分析停止："+e.message,true);setState("相機開啟 · AI 失敗");updateControls();}return;
  }
  const wait=Math.max(0,85-(performance.now()-began));await S.delay(wait);
  if(my===runToken&&stream)raf=requestAnimationFrame(()=>loop(my));
 }
 async function close(){
+ if(S.session?.active())await S.session.stop("相機已關閉");
  ++runToken;cancelAnimationFrame(raf);opening=false;countToken++;
  if(recState==="countdown"){recState="idle";$("countdown").textContent="";}
  if(recState==="recording"||recState==="stopping")await stopRecord();
  if(stream){const s=stream;stream=null;s.getTracks().forEach(t=>t.stop());}
- video.pause();video.srcObject=null;aiReady=false;lastLm=null;
+ video.pause();video.srcObject=null;S.emit("camera-closed");aiReady=false;lastLm=null;
  P.setupOverlay(canvas);P.renderMetrics($("liveMetrics"),{},$("liveView").value);
  $("livePlaceholder").hidden=false;$("liveFPS").textContent="AI 待機";setState("相機未開啟");updateControls();
 }
 function cancelCountdown(){countToken++;recState="idle";$("countdown").textContent="";status("已取消倒數。");updateControls();}
 async function startRecord(){
+ if(S.session?.active()){S.toast("請先結束連續練習。");return;}
  if(recState==="countdown"){cancelCountdown();return;}
  if(recState==="recording"){stopRecord();return;}
  if(recState!=="idle"||!stream)return;
@@ -1088,7 +1112,7 @@ function init(){
  window.addEventListener("pagehide",()=>{++runToken;if(recorder?.state==="recording")recorder.stop();if(stream)stream.getTracks().forEach(t=>t.stop());});
  updateControls();
 }
-S.live={init,open,close,isActive:()=>!!stream||opening,isRecording:()=>recState!=="idle"};
+S.live={getStream:()=>stream,getVideo:()=>video,updateControls,manualRecording:()=>recState!=="idle",init,open,close,isActive:()=>!!stream||opening,isRecording:()=>recState!=="idle"||!!S.session?.active()};
 })();
 
 </script>
@@ -1426,6 +1450,385 @@ S.automation={init,run,render,candidateIndex:()=>index,isBusy:()=>busy};
 })();
 
 </script><script>
+/* Pure, testable v2.4 motion and projection helpers. These are heuristics, not trained impact detection. */
+(function(root){
+'use strict';
+const finite=Number.isFinite, clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function handFeature(s){
+ const l=s.lm,w=s.width,h=s.height;if(!l||!w||!h)return null;
+ const ok=i=>l[i]&&finite(l[i].x)&&finite(l[i].y)&&(l[i].visibility??0)>=.6;
+ if(![11,12,15,16,23,24].every(ok))return null;
+ const mid=(a,b)=>({x:(l[a].x+l[b].x)*w/2,y:(l[a].y+l[b].y)*h/2});
+ const shoulder=mid(11,12),hip=mid(23,24),hand=mid(15,16);
+ const size=Math.hypot(hip.x-shoulder.x,hip.y-shoulder.y);
+ if(size<h*.07)return null;
+ return {t:s.t,x:(hand.x-hip.x)/size,y:(hand.y-hip.y)/size,ready:hand.y>shoulder.y+size*.45};
+}
+class SwingDetector{
+ constructor(){this.reset();}
+ reset(){this.state='waiting';this.previous=null;this.stableSince=null;this.baseline=null;this.motion=null;this.quiet=null;this.cooldown=0;}
+ feed(s){
+  const p=handFeature(s);let event=null;
+  if(!p){if(this.previous&&s.t-this.previous.t>.75){if(this.motion)event={type:'rejected',reason:'tracking-lost'};this.reset();}return {state:this.state,event};}
+  if(this.previous&&p.t<=this.previous.t)return {state:this.state,event};
+  const last=this.previous,dt=last?p.t-last.t:0;
+  const speed=last&&dt>0&&dt<.65?Math.hypot(p.x-last.x,p.y-last.y)/dt:0;
+  this.previous=p;
+  if(dt>.65){this.state='waiting';this.motion=null;this.stableSince=null;return {state:this.state,event:{type:'rejected',reason:'sampling-gap'}};}
+  if(p.t<this.cooldown){this.state='cooldown';return {state:this.state,event};}
+  if(this.state==='cooldown')this.state='waiting';
+  if(this.state==='waiting'){
+   if(p.ready&&speed<.45){if(this.stableSince===null)this.stableSince=p.t;if(p.t-this.stableSince>=.6){this.baseline={...p};this.state='ready';}}
+   else this.stableSince=null;
+  }else if(this.state==='ready'){
+   const d=Math.hypot(p.x-this.baseline.x,p.y-this.baseline.y);
+   if(speed>.65&&d>.1){this.motion={start:last?.t??p.t,peak:speed,peakTime:p.t,excursion:d,rise:this.baseline.y-p.y,count:1};this.state='swing';event={type:'start',t:this.motion.start};}
+   else if(speed<.3)this.baseline={...p};
+  }else if(this.state==='swing'){
+   const m=this.motion;m.count++;m.excursion=Math.max(m.excursion,Math.hypot(p.x-this.baseline.x,p.y-this.baseline.y));m.rise=Math.max(m.rise,this.baseline.y-p.y);
+   if(speed>m.peak){m.peak=speed;m.peakTime=p.t;}
+   if(speed<.5){if(this.quiet===null)this.quiet=p.t;}else this.quiet=null;
+   const elapsed=p.t-m.start,settled=this.quiet!==null&&p.t-this.quiet>=.7;
+   if(elapsed>=1.1&&(settled||elapsed>8)){
+    const accepted=m.peak>=1.4&&m.excursion>=.5&&m.rise>=.2&&m.count>=6&&elapsed<=8.5;
+    event=accepted?{type:'swing',start:m.start,end:p.t,peakTime:m.peakTime,peakNormalizedSpeed:m.peak,excursion:m.excursion,verification:'unconfirmed-swing'}:{type:'rejected',reason:'insufficient-pattern'};
+    this.motion=null;this.state='cooldown';this.cooldown=p.t+1.1;this.stableSince=null;this.quiet=null;
+   }
+  }
+  return {state:this.state,event,speed};
+ }
+}
+function splitSwings(samples,w,h,ratio=1){
+ const d=new SwingDetector(),events=[];
+ for(const s of samples){const out=d.feed({...s,t:s.t/ratio,width:w,height:h});if(out.event?.type==='swing'){const e=out.event;events.push({...e,start:e.start*ratio,end:e.end*ratio,peakTime:e.peakTime*ratio});}}
+ return events;
+}
+function regression(points,key){
+ const n=points.length,mt=points.reduce((a,p)=>a+p.t,0)/n,my=points.reduce((a,p)=>a+p[key],0)/n;
+ let xx=0,xy=0,yy=0;for(const p of points){xx+=(p.t-mt)**2;xy+=(p.t-mt)*(p[key]-my);yy+=(p[key]-my)**2;}
+ if(xx<1e-12)throw new Error('NO_TIME_BASE');const slope=xy/xx,intercept=my-slope*mt;
+ const residual=points.reduce((a,p)=>a+(p[key]-intercept-slope*p.t)**2,0);
+ return {slope,intercept,rms:Math.sqrt(residual/n),r2:yy>1e-12?clamp(1-residual/yy,0,1):1};
+}
+function estimateLaunch(points,config){
+ const fail=(code,detail)=>({ok:false,code,detail});
+ const {width:w,height:h,reference:ref,lengthCm,slowRatio=1,confirmed=false,sideOn=false,timeChecked=false}=config;
+ if(!confirmed)return fail('CONFIRM_BALL');
+ if(!sideOn||!timeChecked)return fail('CHECK_GEOMETRY_TIME');
+ if(!w||!h||!ref||ref.length!==2||!(lengthCm>=10&&lengthCm<=1000))return fail('CALIBRATION');
+ if(!(slowRatio>=1&&slowRatio<=16))return fail('TIME_RATIO');
+ const ax=(ref[1].x-ref[0].x)*w,ay=(ref[1].y-ref[0].y)*h,len=Math.hypot(ax,ay);
+ if(len<30||ax<=0||Math.abs(Math.atan2(ay,ax)*180/Math.PI)>25)return fail('REFERENCE_DIRECTION');
+ const ux=ax/len,uy=ay/len,mpp=lengthCm/100/len;
+ let a=points.filter(p=>[p.x,p.y,p.t].every(finite)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1).slice().sort((a,b)=>a.t-b.t);
+ a=a.filter((p,i)=>!i||p.t-a[i-1].t>1e-5);
+ if(a.length<4)return fail('TOO_FEW_POINTS');
+ const t0=a[0].t,x0=a[0].x*w,y0=a[0].y*h;
+ a=a.filter(p=>(p.t-t0)/slowRatio<=.12);
+ if(a.length<4)return fail('NOT_HIGH_SPEED');
+ const rows=a.map(p=>{const dx=p.x*w-x0,dy=p.y*h-y0,t=(p.t-t0)/slowRatio;return {t,x:(dx*ux+dy*uy)*mpp,y:(dx*uy-dy*ux)*mpp+.5*9.80665*t*t};});
+ const span=rows.at(-1).t;if(span<.006)return fail('TIME_SPAN');
+ const fx=regression(rows,'x'),fy=regression(rows,'y'),speed=Math.hypot(fx.slope,fy.slope),angle=Math.atan2(fy.slope,Math.abs(fx.slope))*180/Math.PI;
+ const chord=Math.hypot((a.at(-1).x-a[0].x)*w,(a.at(-1).y-a[0].y)*h);
+ const rmsPx=Math.hypot(fx.rms,fy.rms)/mpp;
+ if(chord<25||rmsPx>Math.max(3,chord*.04)||fx.r2<.97)return fail('UNSTABLE_TRACK',{rmsPx,chord,r2:fx.r2});
+ if(speed<2||speed>110||angle<0||angle>70)return fail('IMPLAUSIBLE_MOTION');
+ let same=0;for(let i=1;i<rows.length;i++)if((rows[i].x-rows[i-1].x)*fx.slope>0)same++;
+ if(same/(rows.length-1)<.85)return fail('UNSTABLE_TRACK');
+ return {ok:true,speedMps:speed,launchDeg:angle,vx:Math.abs(fx.slope),vy:fy.slope,spanSeconds:span,pointsUsed:a.length,metersPerPixel:mpp,residualPixels:rmsPx,firstVideoTime:t0,source:'calibrated-2d-initial-flight-estimate',notMeasured:['spin','clubSpeed','faceAngle','carry','launchDirection'],geometry:'side-on constant-depth, no lens distortion correction',slowRatio};
+}
+/* RK4: gravity + quadratic drag, optional no-drag comparison. No spin/lift/wind/roll model. */
+function simulate(speed,angle,{cd=.25,rho=1.225,mass=.04593,diameter=.04267,height=0}={}){
+ if(!finite(speed)||speed<=0||!finite(angle)||angle<=0||angle>=90||cd<0||rho<0||mass<=0||diameter<=0)return null;
+ const r=angle*Math.PI/180,k=.5*rho*cd*Math.PI*(diameter/2)**2/mass,g=9.80665,dt=.005;
+ let s=[0,height,speed*Math.cos(r),speed*Math.sin(r)],t=0;const path=[{x:0,y:0,z:height,t:0}];let apex=height;
+ const d=a=>{const v=Math.hypot(a[2],a[3]);return[a[2],a[3],-k*v*a[2],-g-k*v*a[3]];};
+ const add=(a,b,f)=>a.map((v,i)=>v+b[i]*f);
+ for(let n=0;n<8000;n++){
+  const prev=s,pt=t,k1=d(s),k2=d(add(s,k1,dt/2)),k3=d(add(s,k2,dt/2)),k4=d(add(s,k3,dt));
+  s=s.map((v,i)=>v+dt*(k1[i]+2*k2[i]+2*k3[i]+k4[i])/6);t+=dt;apex=Math.max(apex,s[1]);
+  if(s[1]<=0){const f=prev[1]/(prev[1]-s[1]);const x=prev[0]+f*(s[0]-prev[0]);t=pt+f*dt;path.push({x,y:0,z:0,t});return {rangeM:x,apexM:apex,timeS:t,path,assumptions:{cd,rho,mass,diameter,height,spin:'not-measured; lift omitted',lateral:'assumed zero, not measured',wind:'omitted',roll:'omitted'}};}
+  if(n%8===0)path.push({x:s[0],y:0,z:s[1],t});
+ }
+ return null;
+}
+const api={handFeature,SwingDetector,splitSwings,estimateLaunch,simulate};
+if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.SL.motion=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+/* Independent, complete MediaRecorder blocks; never splice arbitrary encoded chunks. */
+(function(){
+'use strict';
+const S=window.SL,$=S.$,M=S.motion;
+let active=false,starting=false,block=null,sessionId=null,detector=new M.SwingDetector(),timer=0,sessionStart=0,serial=Promise.resolve(),lastPose=0,wake=null;
+const labels={waiting:'\u7b49\u5f85\u7a69\u5b9a\u9810\u5099\u59ff\u52e2',ready:'\u5df2\u5c31\u7dd2\uff0c\u7b49\u5f85\u63ee\u687f',swing:'\u5075\u6e2c\u63ee\u687f\u4e2d',cooldown:'\u6536\u687f\u7de9\u885d'};
+function message(t,error=false){$('practiceStatus').textContent=t;$('practiceStatus').classList.toggle('error',error);}
+function controls(){
+ $('practiceStart').disabled=active||starting||!S.live.getStream()||S.live.manualRecording();$('practiceStop').disabled=!active&&!starting;
+ $('practiceAuto').disabled=active;S.live.updateControls();
+}
+function render(){
+ const list=S.state.shots.filter(x=>x.autoSegment&&(!sessionId||x.sessionId===sessionId)).slice().reverse();
+ $('practiceCount').textContent=String(list.length);const host=$('practiceShots');host.replaceChildren();
+ if(!list.length){host.innerHTML='<div class="auto-empty">\u5c1a\u7121\u63ee\u687f\u7d00\u9304\u3002\u5168\u8eab\u5165\u93e1\uff0c\u5148\u7a69\u5b9a\u7ad9\u59ff\u518d\u63ee\u687f\u3002</div>';return;}
+ for(const shot of list){
+  const e=document.createElement('article');e.className='practice-shot';
+  if(shot.thumbnail){const im=document.createElement('img');im.src=shot.thumbnail;im.alt='\u6536\u687f\u7e2e\u5716';e.append(im);}
+  const body=document.createElement('div'),title=document.createElement('strong');title.textContent='Swing '+shot.no+' \u00b7 '+shot.club;body.append(title);
+  const p=document.createElement('p');p.textContent=S.shortDate(shot.createdAt)+' \u00b7 '+shot.autoSegment.clipDuration.toFixed(1)+' s';body.append(p);
+  const tag=document.createElement('small');tag.textContent='\u81ea\u52d5\u5206\u6bb5\uff5c\u672a\u78ba\u8a8d\u64ca\u4e2d\u7403';body.append(tag);
+  const row=document.createElement('div');row.className='control-row';
+  for(const [action,label] of [['play','\u56de\u653e'],['download','\u539f\u7247'],['delete','\u522a\u9664']]){const b=document.createElement('button');b.className='btn secondary small';b.textContent=label;b.dataset.practiceAction=action;b.dataset.id=shot.id;row.append(b);}
+  body.append(row);e.append(body);host.append(e);
+ }
+}
+function thumbnail(){try{const v=S.live.getVideo(),c=document.createElement('canvas');c.width=200;c.height=Math.round(200*v.videoHeight/v.videoWidth);c.getContext('2d').drawImage(v,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.6);}catch(_){return null;}}
+function recorderFor(stream){
+ let mime='';for(const m of ['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp8','video/webm']){if(MediaRecorder.isTypeSupported(m)){mime=m;break;}}
+ try{return new MediaRecorder(stream,{...(mime?{mimeType:mime}:{}),videoBitsPerSecond:2500000});}catch(_){return new MediaRecorder(stream);}
+}
+function startBlock(){
+ if(!active||block||!S.live.getStream())return;
+ try{
+  const rec=recorderFor(S.live.getStream()),v=S.live.getVideo();
+  const b={rec,chunks:[],samples:[],start:performance.now()/1000,event:null,stopAt:0,stopping:false,width:v.videoWidth,height:v.videoHeight,view:$('liveView').value,club:$('liveClub').value};block=b;detector.reset();
+  rec.ondataavailable=e=>{if(e.data?.size)b.chunks.push(e.data);};
+  rec.onerror=e=>{message('\u9023\u7e8c\u9304\u5f71\u932f\u8aa4\uff1a'+(e.error?.message||'MediaRecorder'),true);stop('recording error');};
+  rec.onstop=()=>finishBlock(b);
+  rec.start(500);
+ }catch(e){active=false;block=null;clearInterval(timer);controls();message('\u7121\u6cd5\u555f\u52d5\u9023\u7e8c\u9304\u5f71\uff1a'+e.message,true);}
+}
+function stopBlock(){
+ if(!block||block.stopping)return;const b=block;b.stopping=true;b.end=performance.now()/1000;
+ try{b.rec.stop();}catch(e){block=null;b.resolve?.();if(active)startBlock();}
+}
+async function persist(b){
+ const blob=new Blob(b.chunks,{type:b.rec.mimeType||b.chunks[0]?.type||'video/webm'});if(!blob.size)throw new Error('Empty recording');
+ const duration=b.end-b.start,ev=b.event,clip={start:Math.max(0,ev.start-.7-b.start),end:Math.min(duration,ev.end+.4-b.start)};
+ const samples=b.samples.map(s=>({...s,t:s.t-b.start}));
+ const analysis={schema:'swinglab.analysis.v2.4',duration,clipWindow:clip,view:b.view,width:b.width,height:b.height,slowRatio:1,scaleCm:null,phases:{},marks:{ball:[],club:[],scale:[],lines:[],angles:[],face:[],target:[]},samples,automatic:{...S.autoCore.summarize(samples,b.width,b.height,1),candidates:[],ballAttempted:false,complete:true,version:'2.4.0'},segmentation:{...ev,start:ev.start-b.start,end:ev.end-b.start,peakTime:ev.peakTime-b.start,method:'body-relative wrist motion with setup/settle gates',verification:'unconfirmed-swing'},timingNote:'Wall-clock alignment is approximate. Clip is a playback window inside a complete recording, not a byte-trimmed video.'};
+ const shot=S.createShot({source:'camera',club:b.club,sessionId:b.sessionId,notes:'\u81ea\u52d5\u63ee\u687f\u5206\u6bb5\uff08\u672a\u78ba\u8a8d\u64ca\u7403\uff09',thumbnail:b.thumbnail,autoSegment:{clipDuration:clip.end-clip.start,verification:'unconfirmed-swing'},analysisSummary:{sampleCount:samples.filter(s=>s.lm).length,view:b.view}});
+ shot.mediaId=shot.id;await S.media.put({id:shot.id,blob,analysis});
+ if(!S.saveShot(shot)){await S.media.remove(shot.id);throw new Error('\u7d00\u9304\u7a7a\u9593\u4e0d\u8db3');}
+ render();message('Swing '+shot.no+' \u5df2\u4fdd\u5b58\u3002'+(active?'\u7e7c\u7e8c\u7b49\u5f85\u4e0b\u4e00\u6b21\u63ee\u687f\u3002':''));
+}
+function finishBlock(b){
+ if(block===b)block=null;b.end=b.end||performance.now()/1000;
+ if(b.event){b.sessionId=sessionId;serial=serial.then(()=>persist(b)).catch(e=>{message('\u672a\u4fdd\u5b58\uff1a'+e.message+'\uff0c\u5df2\u505c\u6b62\u7df4\u7fd2\u3002',true);stop('storage error');});}
+ b.resolve?.();if(active)startBlock();
+}
+async function start(){
+ if(active||starting||S.live.manualRecording())return;
+ if(!S.live.getStream()){message('\u8acb\u5148\u958b\u555f\u76f8\u6a5f\u3002');return;}
+ if(!window.MediaRecorder){message('\u6b64\u700f\u89bd\u5668\u7121\u6cd5\u9304\u5f71\uff0c\u4ecd\u53ef\u770b\u5373\u6642\u59ff\u614b\u3002',true);return;}
+ starting=true;controls();
+ try{await S.media.get('__storage_probe__');}
+ catch(e){starting=false;controls();message('\u672c\u6a5f\u5132\u5b58\u4e0d\u53ef\u7528\uff1a'+e.message,true);return;}
+ if(!starting||!S.live.getStream())return;
+ starting=false;active=true;sessionId=S.id();sessionStart=performance.now()/1000;lastPose=0;startBlock();controls();render();
+ try{if(navigator.wakeLock)wake=await navigator.wakeLock.request('screen');}catch(_){}
+ message('\u7df4\u7fd2\u5df2\u555f\u52d5\uff1a\u5148\u7a69\u5b9a\u9810\u5099\u59ff\u52e2\uff0c\u518d\u9023\u7e8c\u63ee\u687f\u3002');
+ clearInterval(timer);timer=setInterval(()=>{
+  if(!active)return;const now=performance.now()/1000;const elapsed=now-sessionStart;$("recClock").textContent="AUTO "+String(Math.floor(elapsed/60)).padStart(2,"0")+":"+String(Math.floor(elapsed%60)).padStart(2,"0");
+  if(now-sessionStart>600){stop('\u5df2\u9054 10 \u5206\u9418\u4fdd\u8b77\u4e0a\u9650');return;}
+  if(lastPose&&now-lastPose>4){$('practiceStage').textContent='\u59ff\u614b\u8ffd\u8e64\u4e2d\u65b7';}
+  if(block?.event&&now>=block.stopAt)stopBlock();
+  else if(block&&!block.event&&now-block.start>12&&detector.state!=='swing')stopBlock();
+  if(block&&block.chunks.reduce((a,c)=>a+c.size,0)>80*1024*1024)stop('\u9304\u5f71\u5340\u584a\u904e\u5927\uff0c\u5df2\u505c\u6b62');
+ },200);
+}
+async function stop(reason='\u5df2\u7d50\u675f\u9023\u7e8c\u7df4\u7fd2'){
+ active=false;starting=false;clearInterval(timer);detector.reset();if(wake){try{await wake.release();}catch(_){}wake=null;}
+ if(block){const b=block;await new Promise(resolve=>{b.resolve=resolve;stopBlock();setTimeout(resolve,6000);});}
+ controls();$('practiceStage').textContent='\u5f85\u6a5f';message(reason);await serial;
+}
+function onPose(s){
+ if(!active||!block||block.stopping||s.t<block.start)return;
+ lastPose=s.t;block.samples.push(s);if(block.samples.length>1600)block.samples.shift();
+ if(block.event)return;
+ const out=detector.feed(s);$('practiceStage').textContent=labels[out.state]||out.state;
+ if(out.event?.type==='swing'){block.event=out.event;block.stopAt=out.event.end+.4;block.thumbnail=thumbnail();message('\u5df2\u627e\u5230\u4e00\u6b21\u63ee\u687f\u5019\u9078\uff0c\u6b63\u5728\u4fdd\u5b58\u2026');}
+}
+function init(){
+ const panel=document.createElement('section');panel.className='panel practice-panel';panel.innerHTML=`
+ <div class="panel-top"><div><span class="eyebrow">CONTINUOUS PRACTICE / V2.4</span><h2>\u81ea\u52d5\u9010\u7403\u7d00\u9304</h2></div><span class="chip accent" id="practiceStage">\u5f85\u6a5f</span></div>
+ <label class="check-row"><input type="checkbox" id="practiceAuto" checked>\u958b\u76f8\u6a5f\u5f8c\u81ea\u52d5\u555f\u52d5\u9023\u7e8c\u7df4\u7fd2</label>
+ <div class="control-row"><button class="btn primary" id="practiceStart">\u958b\u59cb\u9023\u7e8c\u7df4\u7fd2</button><button class="btn secondary" id="practiceStop" disabled>\u7d50\u675f\u7df4\u7fd2</button><span class="chip"><b id="practiceCount">0</b> \u6b21\u63ee\u687f</span></div>
+ <p id="cameraActual" class="hint">\u76f8\u6a5f\u898f\u683c\uff1a\u5c1a\u672a\u958b\u555f</p>
+ <p class="status-line" id="practiceStatus" role="status">\u56fa\u5b9a\u624b\u6a5f\uff0c\u5168\u8eab\u5165\u93e1\u3002\u9810\u5099\u8207\u6536\u687f\u6642\u7a69\u5b9a\u505c\u7559\uff0c\u65b9\u4fbf\u5206\u6bb5\u3002</p>
+ <p class="hint">\u8a66\u63ee\u4e5f\u53ef\u80fd\u8a18\u9304\u3002\u975e\u64ca\u7403\u78ba\u8a8d\u5668\uff1b\u88ab\u906e\u4f4f\u6216\u5e40\u7387\u4e0d\u8db3\u6642\u53ef\u80fd\u6f0f\u8a18\u3002\u56de\u653e\u4f9d\u5206\u6bb5\u6642\u9593\u7bc4\u570d\uff0c\u539f\u7247\u4e0b\u8f09\u4fdd\u7559\u5f85\u6a5f\u7247\u6bb5\u3002</p><div id="practiceShots" class="practice-shots"></div>`;
+ $('liveResult').after(panel);$('practiceStart').onclick=start;$('practiceStop').onclick=()=>stop();
+ window.addEventListener('sl:camera-ready',e=>{const a=e.detail.settings;$('cameraActual').textContent=`\u76f8\u6a5f\u56de\u5831\uff1a${a.width||'?'} \u00d7 ${a.height||'?'} \u00b7 ${Number.isFinite(a.frameRate)?a.frameRate.toFixed(1):'?'} FPS\uff08\u4e0d\u7b49\u65bc AI \u53d6\u6a23\u7387\uff09`;controls();if($('practiceAuto').checked)start();});
+ window.addEventListener('sl:camera-closed',controls);window.addEventListener('sl:live-pose',e=>onPose(e.detail));
+ window.addEventListener('sl:live-ai-error',()=>{if(active)stop('\u4eba\u9ad4\u6a21\u578b\u672a\u6210\u529f\uff0c\u9023\u7e8c\u5206\u6bb5\u5df2\u505c\u6b62\uff1b\u4ecd\u53ef\u624b\u52d5\u9304\u5f71\u3002');});
+ window.addEventListener('sl:data',render);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&active)stop('\u756b\u9762\u9032\u5165\u80cc\u666f\uff0c\u7df4\u7fd2\u5df2\u505c\u6b62');});
+ $('practiceShots').onclick=async e=>{
+  const b=e.target.closest('[data-practice-action]');if(!b)return;const shot=S.state.shots.find(s=>s.id===b.dataset.id);if(!shot)return;
+  if(b.dataset.practiceAction==='delete'){if(!confirm('\u522a\u9664\u9019\u6b21\u63ee\u687f\u8207\u5f71\u7247\uff1f'))return;await S.media.remove(shot.mediaId);S.state.shots=S.state.shots.filter(s=>s.id!==shot.id);S.persist();S.emit('data');return;}
+  if(b.dataset.practiceAction==='play'){if(active){if(!confirm('\u56de\u653e\u5c07\u7d50\u675f\u9023\u7e8c\u7df4\u7fd2\u3002\u7e7c\u7e8c\uff1f'))return;await stop();}S.app.playShot(shot.id);return;}
+  try{const item=await S.media.get(shot.mediaId);if(item?.blob)S.download(item.blob,'Swing-'+shot.no+(item.blob.type.includes('mp4')?'.mp4':'.webm'));}catch(e){S.toast(e.message);}
+ };render();controls();
+}
+S.session={init,start,stop,active:()=>active||starting,render};
+})();
+
+</script><script>
+/* Calibrated, side-on short-window experiment. Results are not a launch monitor measurement. */
+(function(){
+'use strict';
+const S=window.SL,$=S.$,M=S.motion;
+let calibration=[],zone=[],pending=[],pick=null,canvas,scene,busy=false,runID=0,candidates=[],chosen=0,estimate=null,model=null,settingsSnapshot=null;
+const reasons={
+ CONFIRM_BALL:'\u8acb\u5148\u56de\u770b\u7d2b\u8272\u8ecc\u8de1\uff0c\u78ba\u8a8d\u8ffd\u8e64\u7684\u662f\u7403\u3002',
+ CHECK_GEOMETRY_TIME:'\u8acb\u78ba\u8a8d\u5074\u62cd\u5e7e\u4f55\u8207\u5f71\u7247\u6642\u9593\u500d\u7387\u3002',
+ CALIBRATION:'\u8acb\u6a19\u51fa\u540c\u4e00\u6df1\u5ea6\u7684\u6c34\u5e73\u53c3\u8003\u7269\u5169\u7aef\uff0c\u4e26\u586b\u5165\u5be6\u969b\u9577\u5ea6\u3002',
+ REFERENCE_DIRECTION:'\u53c3\u8003\u7dda\u9700\u7531\u5de6\u5230\u53f3\u3001\u63a5\u8fd1\u6c34\u5e73\uff0c\u4e14\u81f3\u5c11 30 \u50cf\u7d20\u9577\u3002',
+ TIME_RATIO:'\u6162\u52d5\u4f5c\u500d\u7387\u7121\u6548\u3002',TOO_FEW_POINTS:'\u8ffd\u8e64\u9ede\u4e0d\u8db3\uff0c\u81f3\u5c11\u8981\u6709 4 \u500b\u4e0d\u540c\u6642\u9593\u7684\u7403\u4f4d\u3002',
+ NOT_HIGH_SPEED:'\u96e2\u687f\u521d\u6bb5 0.12 \u79d2\u5167\u7403\u5f71\u4e0d\u8db3\u3002\u8acb\u4f7f\u7528\u6e05\u695a\u7684\u9ad8\u901f\u5f71\u7247\u3002',
+ TIME_SPAN:'\u6642\u9593\u8cc7\u6599\u4e0d\u8db3\u4ee5\u7a69\u5b9a\u4f30\u7b97\u901f\u5ea6\u3002',UNSTABLE_TRACK:'\u8ecc\u8de1\u4e0d\u5920\u7a69\u5b9a\u6216\u79fb\u52d5\u592a\u77ed\uff0c\u4e0d\u8f38\u51fa\u8ddd\u96e2\u3002',
+ IMPLAUSIBLE_MOTION:'\u4f30\u7b97\u8d85\u51fa\u6b64\u5be6\u9a57\u6a21\u7d44\u7684\u53ef\u7528\u7bc4\u570d\uff0c\u8acb\u6aa2\u67e5\u8ffd\u8e64\u3001\u5c3a\u5ea6\u8207\u6642\u9593\u8a2d\u5b9a\u3002'
+};
+function msg(text,error=false){$('launchStatus').textContent=text;$('launchStatus').classList.toggle('error',error);}
+function setup(){
+ const panel=document.createElement('section');panel.id='launchPanel';panel.className='panel launch-panel';panel.innerHTML=`
+ <div class="panel-top"><div><span class="eyebrow">IMAGE TO FLIGHT / EXPERIMENTAL</span><h2>\u5f71\u50cf\u521d\u901f\u8207 3D \u8ddd\u96e2\u6a21\u578b</h2></div><span class="chip accent">V2.4</span></div>
+ <p class="launch-intro">\u5148\u6821\u6b63\u4e00\u6b21\uff0c\u518d\u8b93\u7a0b\u5f0f\u641c\u5c0b\u51fa\u7403\u8ecc\u8de1\u3002\u4e0d\u7528\u9010\u5e40\u9ede\u7403\uff1b\u4f46\u9700\u78ba\u8a8d\u5019\u9078\u78ba\u5be6\u662f\u7403\u3002</p>
+ <div class="launch-banner">\u53ea\u9069\u7528\u56fa\u5b9a\u5074\u62cd\u3001\u7403\u6cbf\u756b\u9762\u6a6b\u5411\u98db\u884c\u7684\u8fd1\u666f\u3002\u5f8c\u65b9\u671d\u9060\u65b9\u62cd\u7684 DTL \u5f71\u7247\u4e0d\u80fd\u7528\u6b64\u55ae\u5c3a\u5ea6\u6cd5\u7b97\u8ddd\u96e2\u3002</div>
+ <div class="launch-setup"><div class="control-row"><button id="launchScale" class="btn secondary">1 \u6a19\u793a\u6c34\u5e73\u53c3\u8003\u9577\u5ea6</button><button id="launchZone" class="btn secondary">2 \u6846\u9078\u64ca\u7403\u524d\u7403\u4f4d</button><button id="launchCancelPick" class="btn secondary small">\u7d50\u675f\u6a19\u793a</button></div>
+ <div class="launch-fields">
+ <label>\u53c3\u8003\u7269\u5be6\u969b\u9577\u5ea6 (cm)<input id="launchLength" type="number" min="10" max="1000" placeholder="100"></label>
+ <label>\u6a94\u6848\u6642\u9593\u8ef8 FPS<select id="launchFPS"><option>30</option><option selected>60</option><option>120</option><option>240</option></select></label>
+ <label>\u5168\u6bb5\u6162\u52d5\u4f5c\u500d\u7387<select id="launchRatio"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option></select></label>
+ <label>\u6383\u63cf\u8d77\u9ede (\u5f71\u7247\u79d2)<input id="launchStart" type="number" min="0" step="0.01" value="0"></label>
+ <label>\u6383\u63cf\u9577\u5ea6 (\u5f71\u7247\u79d2)<select id="launchWindow"><option value="0.5">0.5</option><option value="1" selected>1.0</option><option value="2">2.0</option><option value="4">4.0</option></select></label>
+ <label>\u98a8\u963b\u4fc2\u6578 Cd (\u5047\u8a2d)<input id="launchCD" type="number" min="0.05" max="0.8" step="0.01" value="0.25"></label></div>
+ <div class="control-row"><button id="launchUseTime" class="btn secondary small">\u7528\u76ee\u524d\u756b\u9762\u4f5c\u8d77\u9ede</button><span class="hint" id="launchCalibration">\u5c1a\u672a\u6821\u6b63</span></div>
+ <label class="check-row"><input id="launchGeometry" type="checkbox">\u5df2\u56fa\u5b9a\u5074\u62cd\uff0c\u53c3\u8003\u7269\u8207\u521d\u6bb5\u7403\u8def\u5728\u540c\u4e00\u6df1\u5ea6\uff0c\u93e1\u982d\u672a\u79fb\u52d5</label>
+ <label class="check-row"><input id="launchTimeCheck" type="checkbox">\u5df2\u78ba\u8a8d\u6a94\u6848 FPS \u8207\u6162\u52d5\u4f5c\u500d\u7387\uff1b\u9019\u6bb5\u6c92\u6709\u8b8a\u901f</label>
+ <p class="hint">\u4f8b\uff1a240 FPS \u62cd\u651d\u300130 FPS \u7b49\u901f\u6162\u653e\u532f\u51fa\uff0c\u8acb\u9078\u6a94\u6848 30 FPS + 8x\u3002\u5207\u63db\u64ad\u653e\u901f\u5ea6\u4e0d\u662f\u6642\u9593\u6821\u6b63\u3002\u6162\u52d5\u4f5c\u8b8a\u901f\u6bb5\u8acb\u5148\u88c1\u5207\u3002</p></div>
+ <div class="control-row"><button class="btn primary" id="launchScan">\u81ea\u52d5\u641c\u5c0b\u51fa\u7403\u8ecc\u8de1</button><button class="btn secondary" id="launchStop" disabled>\u505c\u6b62</button></div>
+ <p class="status-line" id="launchStatus" role="status">\u8acb\u5148\u9078\u64c7\u5f71\u7247\uff0c\u5b9a\u4f4d\u5230\u64ca\u7403\u524d\u7684\u756b\u9762\u3002</p>
+ <div id="launchCandidates" hidden><label>\u7403\u8def\u5019\u9078<select id="launchCandidate"></select></label><label class="check-row"><input id="launchConfirmed" type="checkbox">\u6211\u5df2\u56de\u770b\u78ba\u8a8d\uff0c\u7d2b\u8272\u8ecc\u8de1\u662f\u7403\uff0c\u4e0d\u662f\u767d\u978b\u6216\u53cd\u5149</label><button id="launchCalculate" class="btn primary">\u4f30\u7b97\u521d\u901f\uff0f\u91cd\u7b97 3D \u6a21\u578b</button></div>
+ <div class="launch-kpis" id="launchKPIs"><div><span>\u5f71\u50cf\u6295\u5f71\u521d\u901f</span><b id="launchV">\u2014</b><small>km/h\uff0c\u975e\u687f\u982d\u901f\u5ea6</small></div><div><span>\u5074\u62cd\u8d77\u98db\u89d2</span><b id="launchAngle">\u2014</b><small>2D \u4f30\u7b97</small></div><div><span>\u7121\u65cb\u8f49\u6a21\u578b\u8ddd\u96e2</span><b id="launchRange">\u2014</b><small>\u6a21\u64ec\u843d\u5730\uff0c\u975e\u5be6\u6e2c Carry</small></div></div>
+ <div class="panel-top"><span class="eyebrow">SIMULATED FLIGHT / NO SPIN</span><div class="segmented" id="launchViews"><button class="active" data-view="perspective">3D</button><button data-view="side">\u5074\u8996</button><button data-view="top">\u4fef\u8996</button></div></div>
+ <div class="range-stage launch-range"><canvas id="launchCanvas"></canvas><span class="chip glass launch-watermark">\u5e73\u9762\u6a21\u578b\u7684 3D \u5448\u73fe\uff0c\u672a\u91cf\u6e2c\u5074\u65cb</span></div>
+ <p id="launchModelInfo" class="hint">\u6c92\u6709\u8cc7\u6599\u5c31\u4e0d\u756b\u5f48\u9053\u3002\u6b64\u6a21\u578b\u50c5\u8003\u616e\u91cd\u529b\u8207\u56fa\u5b9a Cd \u98a8\u963b\uff0c\u672a\u7d0d\u5165\u65cb\u8f49\u5347\u529b\u3001\u98a8\u5411\u8207\u6efe\u52d5\u3002</p>
+ <div class="control-row"><button class="btn secondary" id="launchAnimate" disabled>\u91cd\u64ad\u6a21\u64ec</button><button class="btn primary" id="launchSave" disabled>\u5132\u5b58\u5f71\u7247\u8207\u4f30\u7b97</button><button class="btn secondary" id="launchExport" disabled>\u532f\u51fa\u4f30\u7b97 JSON</button></div>
+ <details class="launch-method"><summary>\u4f30\u7b97\u7bc4\u570d\u8207\u4e0d\u652f\u63f4\u9805\u76ee</summary><p>\u59ff\u614b\u7d00\u9304\u9700\u5168\u8eab\u5165\u93e1\uff1b\u7403\u901f\u4f30\u7b97\u9700\u8fd1\u666f\u7403\u5f71\uff0c\u9019\u5169\u7a2e\u53d6\u666f\u4e0d\u4fdd\u8b49\u80fd\u540c\u6642\u6eff\u8db3\u3002\u76f8\u6a5f\u9304\u5b8c\u53ef\u4f7f\u7528\u540c\u4e00\u5de5\u5177\u5206\u6790\uff0c\u4f46\u7db2\u9801\u93e1\u982d\u5e40\u7387\u53ef\u80fd\u4e0d\u8db3\u3002\u539f\u59cb\u5f71\u7247\u4e0d\u6703\u88ab\u8f49\u6210\u771f\u5be6\u4e09\u7dad\u5ea7\u6a19\uff0c\u6c92\u6709\u91cf\u5230\u7684\u65cb\u8f49\u3001\u687f\u9762\u3001\u687f\u901f\u4fdd\u6301\u7a7a\u767d\u3002</p></details>`;
+ $('autoResults').after(panel);
+ canvas=document.createElement('canvas');canvas.id='launchOverlay';canvas.className='launch-overlay';$('reviewStage').append(canvas);
+ scene=new S.visuals.RangeScene($('launchCanvas'));scene.set(null);
+}
+function paint(){
+ const v=S.review.getVideo();if(!canvas||!v)return;
+ const ctx=S.pose.setupOverlay(canvas),b=S.pose.fit(v,canvas),point=p=>({x:b.x+p.x*b.w,y:b.y+p.y*b.h});
+ function line(p,col){if(!p.length)return;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2.5;ctx.beginPath();p.forEach((q,i)=>{const r=point(q);i?ctx.lineTo(r.x,r.y):ctx.moveTo(r.x,r.y);});ctx.stroke();for(const q of p){const r=point(q);ctx.beginPath();ctx.arc(r.x,r.y,4,0,Math.PI*2);ctx.fill();}}
+ line(calibration,'#80cbd8');if(zone.length===2){const a=point(zone[0]),z=point(zone[1]);ctx.strokeStyle='#c8f56a';ctx.strokeRect(a.x,a.y,z.x-a.x,z.y-a.y);}
+ line(pending,'#fff');line(candidates[chosen]?.points||[],'#edb1ec');
+ $('launchCalibration').textContent=(calibration.length===2?'\u53c3\u8003\u7dda\u5df2\u8a2d\u5b9a':'\u53c3\u8003\u7dda\u672a\u8a2d\u5b9a')+' \u00b7 '+(zone.length===2?'\u7403\u4f4d\u5340\u5df2\u8a2d\u5b9a':'\u7403\u4f4d\u5340\u672a\u8a2d\u5b9a');
+}
+function setPick(type){
+ if(!S.review.getMeta().loaded){msg('\u8acb\u5148\u4e0a\u50b3\u6216\u9304\u88fd\u5f71\u7247\u3002',true);return;}
+ if(busy)return;if(type&&S.review.getVideo().readyState<2){msg('\u8acb\u5148\u9ede\u64ad\u653e\u518d\u66ab\u505c\uff0c\u7b49\u5f85\u756b\u9762\u986f\u793a\u3002',true);return;}S.review.pause();S.review.chooseTool('none');pick=type;pending=[];
+ canvas.style.pointerEvents=type?'auto':'none';canvas.style.touchAction=type?'none':'auto';
+ if(type){msg(type==='scale'?'\u5728\u4e0a\u65b9\u5f71\u7247\u4f9d\u5de6\u81f3\u53f3\u9ede\u9078\u6c34\u5e73\u53c3\u8003\u7269\u5169\u7aef\u3002':'\u5728\u4e0a\u65b9\u5f71\u7247\u9ede\u9078\u5169\u500b\u5c0d\u89d2\uff0c\u6846\u4f4f\u64ca\u7403\u524d\u7684\u7403\uff1b\u4e0d\u8981\u6846\u767d\u978b\u3002');$('reviewStage').scrollIntoView({behavior:'auto',block:'center'});}
+ paint();
+}
+function invalidate(){estimate=null;model=null;S.review.setLaunchAnalysis(null);for(const id of ['launchV','launchAngle','launchRange'])$(id).textContent='\u2014';for(const id of ['launchSave','launchExport','launchAnimate'])$(id).disabled=true;scene.set(null);}
+function candidateUI(){
+ $('launchCandidates').hidden=!candidates.length;$('launchConfirmed').checked=false;
+ $('launchCandidate').innerHTML=candidates.map((c,i)=>`<option value="${i}">\u5019\u9078 ${i+1} \u00b7 ${c.points.length} \u500b\u6642\u9593\u9ede</option>`).join('');chosen=0;paint();
+}
+function initialPoints(points,ratio,w,h){
+ const sorted=points.slice().sort((a,b)=>a.t-b.t);let begin=-1;
+ for(let i=1;i<sorted.length;i++){
+  const a=sorted[i-1],b=sorted[i],dt=(b.t-a.t)/ratio,d=Math.hypot((b.x-a.x)*w,(b.y-a.y)*h);
+  if(dt>0&&d>2.5&&d/dt>50){begin=i-1;break;}
+ }
+ return begin<0?[]:sorted.slice(begin).filter(p=>(p.t-sorted[begin].t)/ratio<=.12);
+}
+async function scan(){
+ if(busy||!S.review.getMeta().loaded)return;
+ if(calibration.length!==2||zone.length!==2||!(Number($('launchLength').value)>=10)||!$('launchGeometry').checked||!$('launchTimeCheck').checked){msg('\u8acb\u5148\u5b8c\u6210\u53c3\u8003\u9577\u5ea6\u3001\u7403\u4f4d\u5340\u8207\u5169\u500b\u689d\u4ef6\u78ba\u8a8d\u3002',true);return;}
+ S.review.pause();setPick(null);const v=S.review.getVideo(),meta=S.review.getMeta(),fps=Number($('launchFPS').value),start=Number($('launchStart').value),end=Math.min(meta.duration,start+Number($('launchWindow').value)),ratio=Number($('launchRatio').value);
+ if(!finite(start)||start<0||!(end>start)){msg('\u6383\u63cf\u6642\u9593\u7bc4\u570d\u7121\u6548\u3002',true);return;}
+ const count=Math.ceil((end-start)*fps);if(count>960){msg('\u8acb\u7e2e\u77ed\u6383\u63cf\u7bc4\u570d\u3002',true);return;}
+ busy=true;const my=++runID,original=v.currentTime;invalidate();candidates=[];candidateUI();$('launchScan').disabled=true;$('launchStop').disabled=false;$('videoFile').disabled=true;
+ const tracker=new S.autoCore.BrightTracker({fast:true}),image=document.createElement('canvas'),q=Math.min(1,1280/meta.width);image.width=Math.round(meta.width*q);image.height=Math.round(meta.height*q);const ctx=image.getContext('2d',{willReadFrequently:true});
+ let canceled=false;
+ try{
+  for(let i=0;i<count;i++){
+   if(my!==runID){canceled=true;break;}
+   await S.seek(v,Math.min(end-.0001,start+(i+.5)/fps));if(my!==runID){canceled=true;break;}
+   ctx.drawImage(v,0,0,image.width,image.height);tracker.feed(ctx.getImageData(0,0,image.width,image.height),v.currentTime);
+   msg('\u81ea\u52d5\u641c\u5c0b '+(i+1)+' / '+count+' \u00b7 \u672a\u91cf\u6e2c\u6846\u5916\u7403\u8def');await S.delay(0);
+  }
+  if(!canceled){
+   const x0=Math.min(zone[0].x,zone[1].x),x1=Math.max(zone[0].x,zone[1].x),y0=Math.min(zone[0].y,zone[1].y),y1=Math.max(zone[0].y,zone[1].y);
+   candidates=tracker.results(40).map(c=>({...c,points:initialPoints(c.points,ratio,meta.width,meta.height)})).filter(c=>c.points.length>=4&&c.points[0].x>=x0&&c.points[0].x<=x1&&c.points[0].y>=y0&&c.points[0].y<=y1).slice(0,5);
+   candidateUI();settingsSnapshot={width:meta.width,height:meta.height,slowRatio:ratio,reference:calibration.map(p=>({...p})),lengthCm:Number($('launchLength').value),sideOn:true,timeChecked:true,samplingFPS:fps,start,end};
+   msg(candidates.length?'\u5df2\u627e\u5230\u5019\u9078\u3002\u8acb\u56de\u770b\u7d2b\u8272\u8ecc\u8de1\u662f\u5426\u70ba\u7403\uff0c\u78ba\u8a8d\u5f8c\u518d\u8a08\u7b97\u3002':'\u672a\u53d6\u5f97\u8db3\u5920\u7403\u5f71\u3002\u4e0d\u7522\u751f\u8ddd\u96e2\uff1b\u8acb\u6aa2\u67e5\u7403\u4f4d\u6846\u3001\u64ca\u7403\u6642\u9ede\u8207\u9ad8\u901f\u5f71\u7247\u3002',!candidates.length);
+  }
+ }catch(e){msg('\u6383\u63cf\u5931\u6557\uff1a'+e.message,true);}
+ finally{busy=false;$('launchScan').disabled=false;$('launchStop').disabled=true;$('videoFile').disabled=false;if(my===runID){try{await S.seek(v,original);}catch(_){}paint();}if(canceled)msg('\u5df2\u53d6\u6d88\uff0c\u672a\u7522\u751f\u8ddd\u96e2\u3002');}
+}
+const finite=Number.isFinite;
+function calculate(){
+ if(!candidates[chosen])return;
+ const cfg={...settingsSnapshot,reference:calibration.map(p=>({...p})),lengthCm:Number($('launchLength').value),slowRatio:Number($('launchRatio').value),sideOn:$('launchGeometry').checked,timeChecked:$('launchTimeCheck').checked,confirmed:$('launchConfirmed').checked};
+ if(!settingsSnapshot||cfg.slowRatio!==settingsSnapshot.slowRatio){msg('\u6642\u9593\u500d\u7387\u5df2\u8b8a\u66f4\uff0c\u8acb\u91cd\u65b0\u6383\u63cf\u3002',true);return;}
+ const r=M.estimateLaunch(candidates[chosen].points,cfg);invalidate();
+ if(!r.ok){msg(reasons[r.code]||r.code,true);return;}
+ const cd=Number($('launchCD').value);if(!(cd>=.05&&cd<=.8)){msg('Cd \u9700\u4ecb\u65bc 0.05 \u8207 0.8\u3002',true);return;}
+ estimate=r;model=M.simulate(r.speedMps,r.launchDeg,{cd});if(!model){msg('\u4e0d\u9069\u7528\u98db\u884c\u6a21\u578b\u3002',true);return;}
+ const vacuum=M.simulate(r.speedMps,r.launchDeg,{cd:0});
+ const record={schema:'swinglab.launch.v2.4',calibration:cfg,zone,candidatePoints:candidates[chosen].points,estimate:r,model,comparison:{noDragRangeM:vacuum?.rangeM},verifiedByUser:true,notice:'Experimental projection estimate + assumed no-spin flight model; not measured Carry, spin, club speed or face angle.'};
+ S.review.setLaunchAnalysis(record);show(record);msg('\u4f30\u7b97\u5b8c\u6210\u3002\u8ddd\u96e2\u662f\u6307\u5b9a\u5047\u8a2d\u4e0b\u7684\u6a21\u64ec\uff0c\u4e0d\u662f\u5be6\u6e2c Carry\u3002');
+}
+function show(r){
+ if(!r?.estimate?.ok||!r.model)return;estimate=r.estimate;model=r.model;
+ $('launchV').textContent=(estimate.speedMps*3.6).toFixed(1);$('launchAngle').textContent=estimate.launchDeg.toFixed(1)+'\u00b0';$('launchRange').textContent=model.rangeM.toFixed(1)+' m';
+ scene.set({carry:model.rangeM,apex:model.apexM,offline:0,modelPath:model.path});
+ $('launchModelInfo').textContent=`${estimate.pointsUsed} \u9ede\uff0c\u521d\u6bb5 ${estimate.spanSeconds.toFixed(3)} s\uff1b\u64ec\u5408\u6b98\u5dee ${estimate.residualPixels.toFixed(1)} px\u3002Cd=${model.assumptions.cd}\uff08\u5047\u8a2d\uff09\u3001\u7a7a\u6c23\u5bc6\u5ea6 1.225 kg/m\u00b3\u3001\u8cea\u91cf 45.93 g\u3001\u76f4\u5f91 42.67 mm\uff1b\u672a\u8a08\u5347\u529b\u8207\u98a8\u3002\u7121\u7a7a\u963b\u5c0d\u7167\u6a21\u578b ${r.comparison?.noDragRangeM?.toFixed(1)||'?'} m\uff0c\u4e0d\u662f\u8aa4\u5dee\u7bc4\u570d\u3002\u771f\u5be6 Carry\uff1a\u672a\u91cf\u6e2c\u3002`;
+ for(const id of ['launchSave','launchExport','launchAnimate'])$(id).disabled=false;
+}
+function reset(){
+ ++runID;busy=false;calibration=[];zone=[];pending=[];pick=null;candidates=[];settingsSnapshot=null;estimate=null;model=null;
+ $('launchLength').value='';$('launchGeometry').checked=$('launchTimeCheck').checked=false;$('launchConfirmed').checked=false;canvas.style.pointerEvents='none';
+ $('launchStart').value='0';candidateUI();for(const id of ['launchV','launchAngle','launchRange'])$(id).textContent='\u2014';for(const id of ['launchSave','launchExport','launchAnimate'])$(id).disabled=true;
+ scene.set(null);msg('\u65b0\u5f71\u7247\uff1a\u8acb\u91cd\u65b0\u78ba\u8a8d\u62cd\u651d\u5e7e\u4f55\u8207\u6821\u6b63\uff0c\u907f\u514d\u5957\u7528\u932f\u8aa4\u5c3a\u5ea6\u3002');
+}
+function splitResult(){
+ const info=S.review.getInfo(),ratio=info.slowRatio||1;
+ const swings=M.splitSwings(info.samples||[],info.width,info.height,ratio),host=$('uploadedSwings');host.replaceChildren();
+ const title=document.createElement('p');title.className='hint';title.textContent=swings.length?'\u5f71\u7247\u4e2d\u7684\u63ee\u687f\u5019\u9078\uff08\u975e\u64ca\u7403\u78ba\u8a8d\uff09':'\u5c1a\u672a\u627e\u5230\u5b8c\u6574\u7684\u9810\u5099\u2192\u63ee\u687f\u2192\u6536\u687f\u7247\u6bb5\u3002';host.append(title);
+ for(const [i,s] of swings.entries()){const b=document.createElement('button');b.className='btn secondary small';b.textContent='Swing '+(i+1)+' \u00b7 '+s.start.toFixed(1)+'\u2013'+s.end.toFixed(1)+' s';b.onclick=()=>S.review.gotoTime(Math.max(0,s.start-.5*ratio));host.append(b);}
+}
+function init(){
+ setup();const swings=document.createElement('div');swings.id='uploadedSwings';$('autoEvents').after(swings);
+ $('launchScale').onclick=()=>setPick('scale');$('launchZone').onclick=()=>setPick('zone');$('launchCancelPick').onclick=()=>setPick(null);
+ canvas.addEventListener('pointerdown',e=>{
+  if(!pick||busy)return;e.preventDefault();const v=S.review.getVideo(),r=canvas.getBoundingClientRect(),b=S.pose.fit(v,canvas),x=(e.clientX-r.left-b.x)/b.w,y=(e.clientY-r.top-b.y)/b.h;
+  if(x<0||x>1||y<0||y>1)return;pending.push({x,y});if(pending.length===2){if(pick==='scale')calibration=pending.slice();else zone=pending.slice();setPick(null);invalidate();msg('\u6a19\u793a\u5b8c\u6210\u3002\u8acb\u56de\u5230\u4e0b\u65b9\u5b8c\u6210\u6821\u6b63\u8a2d\u5b9a\u3002');}paint();
+ });
+ $('launchUseTime').onclick=()=>{$('launchStart').value=S.review.getVideo().currentTime.toFixed(3);};
+ $('launchScan').onclick=scan;$('launchStop').onclick=()=>{runID++;};
+ $('launchCandidate').onchange=()=>{chosen=Number($('launchCandidate').value);$('launchConfirmed').checked=false;invalidate();paint();};$('launchCalculate').onclick=calculate;
+ $('launchViews').onclick=e=>{const b=e.target.closest('[data-view]');if(!b)return;scene.view(b.dataset.view);$('launchViews').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));};
+ $('launchAnimate').onclick=()=>scene.animate();$('launchSave').onclick=()=>S.review.save();$('launchExport').onclick=()=>S.download(new Blob([JSON.stringify(S.review.getInfo().launchAnalysis,null,2)],{type:'application/json'}),'SwingLab-launch-estimate.json');
+ for(const id of ['launchLength','launchGeometry','launchTimeCheck','launchConfirmed','launchCD'])$(id).addEventListener('change',()=>{if(estimate)invalidate();});
+ for(const id of ['launchRatio','launchFPS'])$(id).addEventListener('change',()=>{candidates=[];candidateUI();invalidate();msg('\u6642\u9593\u8a2d\u5b9a\u5df2\u8b8a\u66f4\uff0c\u8acb\u91cd\u65b0\u6383\u63cf\u3002');});
+ window.addEventListener('sl:review-ready',()=>{reset();const r=S.review.getInfo().launchAnalysis;if(r){calibration=r.calibration?.reference||[];zone=r.zone||[];$('launchLength').value=r.calibration?.lengthCm||'';$('launchRatio').value=String(r.calibration?.slowRatio||1);show(r);paint();msg('\u5df2\u9084\u539f\u4e4b\u524d\u4fdd\u5b58\u7684\u5f71\u50cf\u4f30\u7b97\u3002');}});
+ window.addEventListener('sl:review-loaded',()=>{if(!S.review.getMeta().loaded){runID++;busy=false;}});
+ window.addEventListener('sl:auto-complete',splitResult);window.addEventListener('sl:review-changed',paint);
+ new ResizeObserver(()=>{paint();scene.draw();}).observe($('reviewStage'));new ResizeObserver(()=>scene.draw()).observe($('launchCanvas'));
+}
+S.launch={init,isBusy:()=>busy,cancel:()=>{runID++;},paint};
+})();
+
+</script><script>
 /* Application controller. All unknown performance values remain null. */
 (function(){
 "use strict";
@@ -1668,7 +2071,7 @@ async function migrate(){
 function init(){
  S.hydrate();fillClubs();
  rangeScene=new S.visuals.RangeScene($("rangeCanvas"));flightScene=new S.visuals.RangeScene($("flightCanvas"));
- S.review.init();S.live.init();S.flight.init();S.feedback.init();S.automation.init();
+ S.review.init();S.live.init();S.flight.init();S.feedback.init();S.automation.init();S.session.init();S.launch.init();
  document.querySelectorAll('[data-action="new-shot"]').forEach(b=>b.onclick=()=>showShot());
  $("demoToggle").onclick=()=>{S.state.demo=!S.state.demo;S.state.selected=null;S.state.comparison.clear();refresh();};$("leaveDemo").onclick=()=>{S.state.demo=false;S.state.selected=null;S.state.comparison.clear();refresh();};
  $("overviewClub").onchange=e=>{S.state.filterClub=e.target.value;renderOverview();};

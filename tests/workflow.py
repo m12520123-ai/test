@@ -1,0 +1,46 @@
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+import json,traceback
+root=Path(__file__).resolve().parents[1];out=root/'tests';results=[]
+with sync_playwright() as p:
+ b=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--autoplay-policy=no-user-gesture-required'])
+ page=b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e: errors.append(str(e)))
+ page.set_content((root/'index.html').read_text(),wait_until='domcontentloaded');page.wait_for_timeout(150)
+ page.evaluate("document.getElementById('autoOnLoad').checked=false")
+ page.locator('#videoFile').set_input_files(str(out/'synthetic_launch.mp4'));page.wait_for_function('SL.review.getMeta().loaded');page.wait_for_timeout(200)
+ results.append({'name':'upload decodes synthetic H264 video','passed':page.evaluate('SL.review.getMeta().width===1280')})
+ page.locator('#launchScan').click();results.append({'name':'uncalibrated scan does not produce distance','passed':page.locator('#launchRange').inner_text()=='\u2014'})
+ def mark(button,points):
+  page.locator(button).click();page.wait_for_timeout(500)
+  page.evaluate("""(points)=>{for(const [x,y] of points){const c=document.getElementById('launchOverlay'),r=c.getBoundingClientRect(),b=SL.pose.fit(SL.review.getVideo(),c);c.dispatchEvent(new PointerEvent('pointerdown',{clientX:r.left+b.x+x*b.w,clientY:r.top+b.y+y*b.h,pointerType:'touch',bubbles:true}));}}""",points)
+ mark('#launchScale',[(200/1280,630/720),(400/1280,630/720)])
+ mark('#launchZone',[(130/1280,525/720),(170/1280,575/720)])
+ page.locator('#launchLength').fill('100');page.locator('#launchFPS').select_option('60');page.locator('#launchWindow').select_option('0.5')
+ page.locator('#launchGeometry').check();page.locator('#launchTimeCheck').check()
+ page.evaluate('''()=>{const proto=SL.autoCore.BrightTracker.prototype,orig=proto.results;proto.results=function(...args){const result=orig.apply(this,args);window.__track={results:result,tracks:this.tracks.map(t=>({id:t.id,length:t.points.length,points:t.points})),width:this.width};return result}}''');page.locator('#launchScan').click();page.wait_for_function('!SL.launch.isBusy()',timeout=20000)
+ (out/'tracker-debug.json').write_text(json.dumps(page.evaluate('window.__track'),indent=2));print('scan status:',page.locator('#launchStatus').inner_text());print('candidates',page.locator('#launchCandidate option').count())
+ results.append({'name':'high-rate seeded bright-ball search finds synthetic candidate','passed':page.locator('#launchCandidate option').count()>0})
+ if page.locator('#launchCandidate option').count():
+  page.locator('#launchCalculate').click();results.append({'name':'unverified candidate is not converted to range','passed':page.locator('#launchRange').inner_text()=='\u2014'})
+  page.locator('#launchConfirmed').check();page.locator('#launchCalculate').click();r=page.evaluate('SL.review.getInfo().launchAnalysis')
+  print('calibration',r['calibration']['reference'] if r else None);print('result',json.dumps(r['estimate'] if r else None,indent=2));print('status',page.locator('#launchStatus').inner_text())
+  results.append({'name':'calibrated synthetic speed within 5 percent','passed':bool(r and abs(r['estimate']['speedMps']-25)/25<.05)})
+  results.append({'name':'calibrated synthetic angle within 2 degrees','passed':bool(r and abs(r['estimate']['launchDeg']-20)<2)})
+  results.append({'name':'actual Carry not fabricated in saved model','passed':bool(r and 'carry' not in r and 'spin' in r['estimate']['notMeasured'])})
+  page.locator('#launchViews [data-view=side]').click();page.locator('#launchViews [data-view=top]').click();page.locator('#launchViews [data-view=perspective]').click()
+  results.append({'name':'three model views switch without errors','passed':not errors})
+  page.set_viewport_size({'width':390,'height':844});page.locator('#launchKPIs').scroll_into_view_if_needed();page.screenshot(path=str(out/'launch-synthetic-mobile.png'))
+  results.append({'name':'model results fit mobile viewport','passed':page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')})
+  # No user data involved: exercise persistence wiring with an in-memory store.
+  page.evaluate('''()=>{window.__saved=new Map();SL.media.put=async x=>{__saved.set(x.id,x)};SL.media.get=async id=>__saved.get(id);SL.saveShot=s=>{SL.state.shots.push(s);return true};}''')
+  page.locator('#launchSave').click();page.wait_for_timeout(200)
+  results.append({'name':'save keeps model alongside original video','passed':page.evaluate('[...__saved.values()].some(x=>x.blob.size>0&&x.analysis.launchAnalysis?.estimate?.ok)')})
+  saved=page.evaluate('SL.review.getInfo().launchAnalysis')
+  page.evaluate('window.__launchSaved=SL.review.getInfo()')
+  page.evaluate('''async()=>{const file=SL.review.getFile();await SL.review.load(file,{analysis:window.__launchSaved});}''');page.wait_for_timeout(100)
+  results.append({'name':'saved launch estimate restores on reopen','passed':page.locator('#launchRange').inner_text()!='\u2014'})
+  page.locator('#videoFile').set_input_files(str(out/'synthetic_launch.mp4'));page.wait_for_timeout(300)
+  results.append({'name':'new upload clears old calibrated distance','passed':page.locator('#launchRange').inner_text()=='\u2014'})
+ results.append({'name':'no browser runtime errors','passed':not errors,'details':errors})
+ b.close()
+(out/'workflow-results.json').write_text(json.dumps(results,indent=2));print(json.dumps(results,indent=2))

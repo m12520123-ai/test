@@ -59,8 +59,10 @@ class RangeScene{
   for(let i=0;i<=maxI;i++){
     const t=i/100;
     const side=S.finite(shot.launchDir)?shot.offline*t*t+Math.tan(shot.launchDir*Math.PI/180)*shot.carry*t*(1-t):shot.offline*t;
-    const high=canArc?4*shot.apex*t*(1-t):0;
-    pts.push(project(side,shot.carry*t,high));shadow.push(project(side,shot.carry*t,0));
+    const modelPoint=shot.modelPath?.[Math.min(shot.modelPath.length-1,Math.round(t*(shot.modelPath.length-1)))];
+    const high=modelPoint?modelPoint.z:(canArc?4*shot.apex*t*(1-t):0);
+    const forward=modelPoint?modelPoint.x:shot.carry*t;
+    pts.push(project(side,forward,high));shadow.push(project(side,forward,0));
   }
   if(canArc&&pts.length>1){
     ctx.setLineDash([3,5]);path(ctx,shadow,null,"#0d231b99",1,false);ctx.setLineDash([]);

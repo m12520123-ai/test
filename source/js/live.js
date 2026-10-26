@@ -7,12 +7,12 @@ let recorder=null,recState="idle",countToken=0,chunks=[],recSamples=[],recStart=
 function status(msg,error=false){$("liveStatus").textContent=msg;$("liveStatus").className="status-line"+(error?" error":"");}
 function setState(text){$("liveState").textContent=text;}
 function updateControls(){
- const has=!!stream,busy=recState!=="idle";
+ const has=!!stream,busy=recState!=="idle"||!!S.session?.active();
  $("openCamera").disabled=opening||has;
  $("stopCamera").disabled=!has&&!opening;
  $("cameraFacing").disabled=opening||busy||has;
  $("liveView").disabled=busy;$("liveClub").disabled=busy;
- $("recordButton").disabled=(recState==="idle"&&(!has||!window.MediaRecorder))||recState==="stopping";
+ $("recordButton").disabled=(recState==="idle"&&(!has||!window.MediaRecorder))||recState==="stopping"||!!S.session?.active();
  $("recordButton").classList.toggle("recording",recState==="recording");
  $("recordButton").innerHTML=recState==="countdown"?"取消倒數":recState==="recording"?"停止錄影":recState==="stopping"?"正在整理影片…":"<i></i>3 秒倒數錄影";
  $("resetBaseline").disabled=!has||!aiReady;
@@ -30,7 +30,7 @@ async function open(){
   $("livePlaceholder").hidden=true;baseline=null;aiReady=false;lastLm=null;
   setState("相機就緒 · AI 載入中");updateControls();status("相機已開啟，正在載入人體模型。");
   s.getVideoTracks()[0].addEventListener("ended",()=>{if(stream){close();status("相機串流已中斷，請重新開啟。",true);}},{once:true});
-  loop(my);
+  S.emit("camera-ready",{settings:stream.getVideoTracks()[0].getSettings()});loop(my);
  }catch(e){
   if(my!==runToken)return;
   const friendly={NotAllowedError:"未取得相機權限。請在 Safari 的網站設定允許相機。",NotFoundError:"找不到可用鏡頭。",NotReadableError:"鏡頭可能被另一個程式占用，請關閉後重試。"};
@@ -47,30 +47,33 @@ async function loop(my){
   aiReady=true;lastLm=lm;
   if(lm&&baseline===null&&P.valid(lm[0]))baseline=lm[0].x;
   const m=P.metrics(lm,frameWidth,frameHeight,baseline);
+  S.emit("live-pose",{t:captureTime/1000,lm,metrics:m,width:frameWidth,height:frameHeight});
   const ctx=P.setupOverlay(canvas);P.draw(ctx,lm,P.fit(video,canvas));P.renderMetrics($("liveMetrics"),m,$("liveView").value);
   const fps=1000/Math.max(1,performance.now()-began);
   $("liveFPS").textContent=`AI ${Math.min(fps,12).toFixed(1)} 次／秒`;
   if(recState==="recording"&&captureTime>=recStart)recSamples.push({t:(captureTime-recStart)/1000,lm,metrics:m});
-  setState(recState==="recording"?"REC · AI LIVE":"AI LIVE");
+  setState(recState==="recording"?"REC · AI LIVE":S.session?.active()?"AUTO REC · AI LIVE":"AI LIVE");
   status(lm?(recState==="recording"?"錄製原始影片中，同步保留姿態資料；時間對齊為近似值。":"人體姿態已偵測；被遮住或低信心的關節不顯示數值。"):"目前未取得可靠人體姿態，請讓全身清楚入鏡。");
   updateControls();
  }catch(e){
-  if(my===runToken){aiReady=false;status("姿態分析停止："+e.message,true);setState("相機開啟 · AI 失敗");updateControls();}return;
+  if(my===runToken){S.emit("live-ai-error",{message:e.message});aiReady=false;status("姿態分析停止："+e.message,true);setState("相機開啟 · AI 失敗");updateControls();}return;
  }
  const wait=Math.max(0,85-(performance.now()-began));await S.delay(wait);
  if(my===runToken&&stream)raf=requestAnimationFrame(()=>loop(my));
 }
 async function close(){
+ if(S.session?.active())await S.session.stop("相機已關閉");
  ++runToken;cancelAnimationFrame(raf);opening=false;countToken++;
  if(recState==="countdown"){recState="idle";$("countdown").textContent="";}
  if(recState==="recording"||recState==="stopping")await stopRecord();
  if(stream){const s=stream;stream=null;s.getTracks().forEach(t=>t.stop());}
- video.pause();video.srcObject=null;aiReady=false;lastLm=null;
+ video.pause();video.srcObject=null;S.emit("camera-closed");aiReady=false;lastLm=null;
  P.setupOverlay(canvas);P.renderMetrics($("liveMetrics"),{},$("liveView").value);
  $("livePlaceholder").hidden=false;$("liveFPS").textContent="AI 待機";setState("相機未開啟");updateControls();
 }
 function cancelCountdown(){countToken++;recState="idle";$("countdown").textContent="";status("已取消倒數。");updateControls();}
 async function startRecord(){
+ if(S.session?.active()){S.toast("請先結束連續練習。");return;}
  if(recState==="countdown"){cancelCountdown();return;}
  if(recState==="recording"){stopRecord();return;}
  if(recState!=="idle"||!stream)return;
@@ -147,5 +150,5 @@ function init(){
  window.addEventListener("pagehide",()=>{++runToken;if(recorder?.state==="recording")recorder.stop();if(stream)stream.getTracks().forEach(t=>t.stop());});
  updateControls();
 }
-S.live={init,open,close,isActive:()=>!!stream||opening,isRecording:()=>recState!=="idle"};
+S.live={getStream:()=>stream,getVideo:()=>video,updateControls,manualRecording:()=>recState!=="idle",init,open,close,isActive:()=>!!stream||opening,isRecording:()=>recState!=="idle"||!!S.session?.active()};
 })();

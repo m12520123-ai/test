@@ -3,12 +3,12 @@
 "use strict";
 const S=window.SL,$=S.$,P=S.pose;
 let v,c,ctx,currentFile=null,url=null,token=0,scanToken=0,scanning=false,tool="none",baseline=null,loaded=false,shotId=null,source="video";
-let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false,automatic=null,knownDuration=null;
+let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false,automatic=null,knownDuration=null,launchAnalysis=null,clipWindow=null;
 let samples=[],marks={ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]},phases={},undo=[],pending=[],seekBusy=false,paintRAF=0;
 const emptyMarks=()=>({ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]});
 function status(t,error=false){$("videoStatus").textContent=t;$("videoStatus").className="status-line"+(error?" error":"");}
 function duration(){return Number.isFinite(v?.duration)&&v.duration>0?v.duration:knownDuration;}
-function info(){return{duration:duration(),view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),automatic,schema:"swinglab.analysis.v2.3"};}
+function info(){return{duration:duration(),view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),automatic,launchAnalysis,clipWindow,schema:"swinglab.analysis.v2.4"};}
 function controls(){
  const lock=!loaded||scanning;
  ["markNext","finishMarks","undoAnnotation","clearAnnotations","resultSave","exportMarksCSV"].forEach(id=>{if($(id))$(id).disabled=lock;});
@@ -21,10 +21,10 @@ function controls(){
  if($("cancelAnalysis"))$("cancelAnalysis").hidden=!scanning&&!frameBusy;
 }
 async function load(file,options={}){
- if(!file)return;
+ if(!file)return;S.launch?.cancel();
  if(!(file instanceof Blob)||file.size===0){status("選到的影片是空檔案。",true);return;}
  cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";knownDuration=Number.isFinite(options.duration)&&options.duration>0?options.duration:options.analysis?.duration||null;currentClub=options.club||S.state.shots.find(s=>s.id===shotId)?.club||"7I";
- automatic=null;samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
+ automatic=null;launchAnalysis=null;clipWindow=null;samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
  $("scaleCm").value="";$("slowRatio").value="1";$("playbackRate").value="1";v.playbackRate=1;
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);v.src=url;
  $("videoPlaceholder").hidden=true;$("reviewStage").classList.remove("marking");$("videoFile").value="";
@@ -34,7 +34,7 @@ async function load(file,options={}){
   await S.waitMetadata(v);if(my!==token)return;
   loaded=true;const analysis=options.analysis;
   if(analysis){
-   automatic=analysis.automatic||null;
+   automatic=analysis.automatic||null;launchAnalysis=analysis.launchAnalysis||null;clipWindow=analysis.clipWindow||null;
    samples=Array.isArray(analysis.samples)?analysis.samples:[];marks=analysis.marks?{...emptyMarks(),...analysis.marks}:emptyMarks();phases=analysis.phases||{};
    if(["face","dtl"].includes(analysis.view))$("videoView").value=analysis.view;
    $("scaleCm").value=analysis.scaleCm??"";$("slowRatio").value=String(analysis.slowRatio||1);
@@ -42,6 +42,7 @@ async function load(file,options={}){
   $("clipEnd").value=Math.min(5,Number.isFinite(v.duration)?v.duration:5).toFixed(2);$("clipStart").value="0";
   $("videoSeek").max=Number.isFinite(v.duration)?v.duration:1;
   status(`影片已就緒 · ${v.videoWidth} × ${v.videoHeight} · ${Number.isFinite(v.duration)?v.duration.toFixed(2):"未知"} 秒。${samples.length?"已有 "+samples.length+" 筆姿態資料。":""}`);
+  if(clipWindow){v.currentTime=Math.max(0,clipWindow.start||0);$("clipStart").value=clipWindow.start.toFixed(2);$("clipEnd").value=clipWindow.end.toFixed(2);}
   controls();renderPhases();draw();updateEstimate();syncTime();S.emit("review-loaded",meta());S.emit("review-ready",{...meta(),restored:!!analysis});
  }catch(e){if(my===token){status(e.message,true);controls();S.emit("review-loaded",meta());}}
 }
@@ -171,7 +172,7 @@ async function runFrozen(notify){
  try{return await P.run(image,notify);}finally{aiPending=false;controls();}
 }
 async function analyzeFrame(){
- if(!loaded||scanning||frameBusy||aiPending)return;
+ if(!loaded||scanning||frameBusy||aiPending||S.launch?.isBusy())return;
  v.pause();const my=token,ft=++frameToken,t=v.currentTime;frameBusy=true;controls();
  try{
   const lm=await runFrozen(msg=>{if(ft===frameToken)status(msg);});if(my!==token||ft!==frameToken)return;
@@ -183,10 +184,10 @@ async function analyzeFrame(){
  }catch(e){if(ft===frameToken)status(e.message,true);}finally{frameBusy=false;controls();S.emit("review-changed");}
 }
 async function scan(options={}){
- if(!loaded||scanning||frameBusy||aiPending)return;
+ if(!loaded||scanning||frameBusy||aiPending||S.launch?.isBusy())return;
  const auto=options.automatic===true;
- const start=auto?0:S.num($("clipStart").value),end=auto?duration():S.num($("clipEnd").value);
- let fps=auto?Math.min(15,900/Math.max(end,1)):S.num($("sampleFPS").value)||15;
+ const start=auto?(clipWindow?.start||0):S.num($("clipStart").value),end=auto?(clipWindow?.end||duration()):S.num($("clipEnd").value);
+ let fps=auto?Math.min(15,900/Math.max(end-start,1)):S.num($("sampleFPS").value)||15;
  if(start===null||end===null||start<0||end<=start||!Number.isFinite(duration())||end>duration()+.01){status("\u5f71\u7247\u9577\u5ea6\u7121\u6548\uff0c\u8acb\u5148\u78ba\u8a8d\u53ef\u4ee5\u64ad\u653e\u3002",true);return;}
  if(auto&&end>120){status("\u81ea\u52d5\u6a21\u5f0f\u652f\u63f4 120 \u79d2\u5167\u77ed\u7247\u3002\u8acb\u5148\u88c1\u5207\u55ae\u6b21\u63ee\u687f\uff0c\u6216\u4f7f\u7528\u9032\u968e\u5340\u6bb5\u6383\u63cf\u3002",true);return;}
  const count=Math.min(900,Math.ceil((end-start)*fps));
@@ -270,10 +271,10 @@ function init(){
  $("videoFile").addEventListener("change",e=>{const f=e.target.files?.[0];if(f)load(f);});
  $("analyzeVideo").onclick=analyzeFrame;$("analyzeClip").onclick=scan;$("cancelAnalysis").onclick=()=>{cancelScan();status("已取消掃描，標記、播放與匯出已解鎖。AI 請求若仍在處理，會在結束後才能再按分析。");};
  $("stepBack").onclick=()=>step(-1);$("stepNext").onclick=()=>step(1);
- $("togglePlayback").onclick=async()=>{if(!loaded)return;if(tool!=="none")chooseTool("none");if(v.paused){try{await v.play();}catch(e){status("播放失敗："+e.message,true);}}else v.pause();};
+ $("togglePlayback").onclick=async()=>{if(!loaded)return;if(tool!=="none")chooseTool("none");if(v.paused){try{if(clipWindow&&(v.currentTime>=clipWindow.end-.03||v.currentTime<clipWindow.start))await S.seek(v,clipWindow.start);await v.play();}catch(e){status("播放失敗："+e.message,true);}}else v.pause();};
  $("videoSeek").addEventListener("input",()=>{if(loaded&&!scanning){v.pause();v.currentTime=Number($("videoSeek").value);}});
  $("playbackRate").onchange=()=>v.playbackRate=Number($("playbackRate").value);
- v.addEventListener("timeupdate",()=>{syncTime();if(v.paused)draw();});v.addEventListener("seeked",()=>{syncTime();draw();});
+ v.addEventListener("timeupdate",()=>{if(clipWindow&&!v.paused&&v.currentTime>=clipWindow.end)v.pause();syncTime();if(v.paused)draw();});v.addEventListener("seeked",()=>{syncTime();draw();});
  v.addEventListener("play",playbackDraw);v.addEventListener("pause",()=>{cancelAnimationFrame(paintRAF);syncTime();draw();});
  v.addEventListener("error",()=>{status("影片解碼失敗。請改用瀏覽器可播放的格式；副檔名不代表編碼。",true);});
  $("annotationTools").addEventListener("click",e=>{const b=e.target.closest("[data-tool]");if(b&&!b.disabled)chooseTool(b.dataset.tool);});
@@ -302,5 +303,5 @@ function confirmCandidate(index){
  const candidate=automatic?.candidates?.[index];if(!candidate||scanning)return;
  saveUndo();marks.ball=candidate.points.map(p=>({...p,source:"user-confirmed-experimental-track"}));draw();updateEstimate();
 }
-S.review={init,load,save,draw,getAutomatic:()=>automatic,confirmCandidate,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
+S.review={getVideo:()=>v,getFile:()=>currentFile,setLaunchAnalysis:r=>{launchAnalysis=r;S.emit("review-changed");},init,load,save,draw,getAutomatic:()=>automatic,confirmCandidate,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();S.launch?.cancel();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
 })();

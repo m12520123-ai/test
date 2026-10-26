@@ -1,51 +1,245 @@
-{
-  "unit": {
-    "unitTests": 10,
-    "passed": [
-      "empty samples do not manufacture values",
-      "normalized motion uses pixel aspect ratio",
-      "slow motion conversion multiplies image rate",
-      "low-confidence hand samples are omitted",
-      "missing detections do not join distant segments",
-      "stationary wrists have zero image rate",
-      "static bright object is not a moving candidate",
-      "moving synthetic white object produces a candidate",
-      "empty frame produces no candidates",
-      "output never contains radar speed fields"
-    ]
+[
+  {
+    "suite": "core",
+    "name": "quiet address does not produce a shot",
+    "passed": true
   },
-  "browser": {
-    "passed": [
-      "default page is automatic analysis",
-      "advanced controls not required",
-      "mobile layout does not overflow",
-      "upload auto-starts complete scan",
-      "pose stub flows into summary",
-      "experimental detector processes decoded fixture",
-      "automatic scan does not create radar values",
-      "candidate identity remains unconfirmed",
-      "automatic charts render",
-      "scan unlocks playback",
-      "save path includes automatic summary",
-      "save does not invent carry or club speed",
-      "cancel releases UI",
-      "stub camera starts live pose flow",
-      "recorded canvas stream reconnects and auto-analyzes",
-      "recorded duration remains available",
-      "camera closed after recording handoff",
-      "model load failure explicit",
-      "candidate scan independent of model failure",
-      "no stale body results on failure",
-      "manual tools usable after failure",
-      "no uncaught exceptions"
-    ],
-    "count": 22,
-    "uncaughtErrors": [],
-    "limitations": [
-      "Browser navigation is administratively blocked; HTML executed using set_content on a blank page.",
-      "Pose, camera input, localStorage and media persistence were test stubs, not production services.",
-      "Video decoding, canvas candidate detection and UI events ran in Chromium with a synthetic clip.",
-      "No real MediaPipe inference, true golf clip, physical iPhone, or production IndexedDB verification."
-    ]
+  {
+    "suite": "core",
+    "name": "setup backswing downswing and finish produce one candidate",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "two separated swings produce two segments",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "tracking loss never invents a shot",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "slow motion time converted back to source timeline",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "pixel calibration and aspect ratio recover synthetic launch",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "requires user verification of the tracked object",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "rejects unverified side-on geometry",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "rejects missing calibration",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "rejects short or reversed reference",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "requires four independent timestamps",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "duplicate timestamps do not multiply evidence",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "slow playback ratio recovers true initial velocity",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "unstable trajectory is rejected",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "no drag matches analytic projectile range",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "drag scenario has no fabricated lateral curvature",
+    "passed": true
+  },
+  {
+    "suite": "core",
+    "name": "simulation leaves actual spin unmeasured",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route flight",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route capture",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route video",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route overview",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route history",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "route settings",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "no overflow 390",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "no overflow 768",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "no overflow 1440",
+    "passed": true
+  },
+  {
+    "suite": "smoke",
+    "name": "no startup or routing errors",
+    "passed": true,
+    "details": []
+  },
+  {
+    "suite": "workflow",
+    "name": "upload decodes synthetic H264 video",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "uncalibrated scan does not produce distance",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "high-rate seeded bright-ball search finds synthetic candidate",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "unverified candidate is not converted to range",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "calibrated synthetic speed within 5 percent",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "calibrated synthetic angle within 2 degrees",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "actual Carry not fabricated in saved model",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "three model views switch without errors",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "model results fit mobile viewport",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "save keeps model alongside original video",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "saved launch estimate restores on reopen",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "new upload clears old calibrated distance",
+    "passed": true
+  },
+  {
+    "suite": "workflow",
+    "name": "no browser runtime errors",
+    "passed": true,
+    "details": []
+  },
+  {
+    "suite": "session",
+    "name": "camera ready automatically starts continuous practice",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "two synthetic swings are saved as two independent records",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "recorded blobs have bytes and valid clip windows",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "live page accumulates a card for each swing",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "trial swings are not claimed as verified impact",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "complete recording blob can be decoded on replay",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "replay restores the automatic segment bounds",
+    "passed": true
+  },
+  {
+    "suite": "session",
+    "name": "continuous workflow no runtime errors",
+    "passed": true,
+    "details": []
   }
-}
+]
