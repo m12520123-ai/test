@@ -3,10 +3,10 @@
 "use strict";
 const S=window.SL,$=S.$;
 const NAV=[
+ ["flight","scan","自動分析","自動","AUTO ANALYSIS","選好影片，分析就開始。","上傳或開鏡頭，人體分析自動進行；手動校正只是選用。"],
  ["overview","overview","練習總覽","總覽","THE PRACTICE STUDIO","每一桿，都更有方向。","動作、數據與回顧，放在同一個練習空間。"],
  ["capture","camera","即時攝影","即時","LIVE ANALYSIS","瞄準這一桿的進步。","手機鏡頭、人體骨架與錄影，準備好就開始。"],
  ["video","video","影片分析","影片","REPLAY STUDIO","把細節，看得更清楚。","回放、標記與校正，讓影片成為你的練習筆記。"],
- ["flight","flight","彈道與桿面","彈道","BALL FLIGHT LAB","看見方向，理解數據。","從不同視角回顧同一球；示意與量測來源清楚分開。"],
  ["history","history","紀錄與比較","紀錄","YOUR PRACTICE JOURNAL","讓進步，有跡可循。","保存每一次練習，找出穩定的改變。"],
  ["settings","settings","設定與裝置","設定","YOUR WORKSPACE","依你的習慣，準備就緒。","管理單位、資料與儲存空間。"]
 ];
@@ -106,7 +106,7 @@ async function storageInfo(){
 function refresh(){refreshCommon();if(S.state.route==="overview")renderOverview();if(S.state.route==="flight")renderFlight();if(S.state.route==="history")renderHistory();}
 async function route(){
  const generation=++routeGeneration,previous=S.state.route;
- const requested=location.hash.slice(1)||"overview",next=NAV.some(n=>n[0]===requested)?requested:"overview";
+ const requested=location.hash.slice(1)||"flight",next=NAV.some(n=>n[0]===requested)?requested:"flight";
  if(next!==previous&&S.live.isActive()){
   if(S.live.isRecording()&&!confirm("切換頁面會停止錄影並關閉相機。繼續？")){history.replaceState(null,"","#"+previous);return;}
   S.flight.suppress(true);await S.live.close();S.flight.suppress(false);
@@ -240,7 +240,7 @@ async function migrate(){
 function init(){
  S.hydrate();fillClubs();
  rangeScene=new S.visuals.RangeScene($("rangeCanvas"));flightScene=new S.visuals.RangeScene($("flightCanvas"));
- S.review.init();S.live.init();S.flight.init();S.feedback.init();
+ S.review.init();S.live.init();S.flight.init();S.feedback.init();S.automation.init();
  document.querySelectorAll('[data-action="new-shot"]').forEach(b=>b.onclick=()=>showShot());
  $("demoToggle").onclick=()=>{S.state.demo=!S.state.demo;S.state.selected=null;S.state.comparison.clear();refresh();};$("leaveDemo").onclick=()=>{S.state.demo=false;S.state.selected=null;S.state.comparison.clear();refresh();};
  $("overviewClub").onchange=e=>{S.state.filterClub=e.target.value;renderOverview();};

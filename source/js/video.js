@@ -3,11 +3,12 @@
 "use strict";
 const S=window.SL,$=S.$,P=S.pose;
 let v,c,ctx,currentFile=null,url=null,token=0,scanToken=0,scanning=false,tool="none",baseline=null,loaded=false,shotId=null,source="video";
-let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false;
+let currentClub="7I",frameBusy=false,frameToken=0,aiPending=false,automatic=null,knownDuration=null;
 let samples=[],marks={ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]},phases={},undo=[],pending=[],seekBusy=false,paintRAF=0;
 const emptyMarks=()=>({ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]});
 function status(t,error=false){$("videoStatus").textContent=t;$("videoStatus").className="status-line"+(error?" error":"");}
-function info(){return{view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),schema:"swinglab.analysis.v2"};}
+function duration(){return Number.isFinite(v?.duration)&&v.duration>0?v.duration:knownDuration;}
+function info(){return{duration:duration(),view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),automatic,schema:"swinglab.analysis.v2.3"};}
 function controls(){
  const lock=!loaded||scanning;
  ["markNext","finishMarks","undoAnnotation","clearAnnotations","resultSave","exportMarksCSV"].forEach(id=>{if($(id))$(id).disabled=lock;});
@@ -22,8 +23,8 @@ function controls(){
 async function load(file,options={}){
  if(!file)return;
  if(!(file instanceof Blob)||file.size===0){status("選到的影片是空檔案。",true);return;}
- cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";currentClub=options.club||S.state.shots.find(s=>s.id===shotId)?.club||"7I";
- samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
+ cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";knownDuration=Number.isFinite(options.duration)&&options.duration>0?options.duration:options.analysis?.duration||null;currentClub=options.club||S.state.shots.find(s=>s.id===shotId)?.club||"7I";
+ automatic=null;samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
  $("scaleCm").value="";$("slowRatio").value="1";$("playbackRate").value="1";v.playbackRate=1;
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);v.src=url;
  $("videoPlaceholder").hidden=true;$("reviewStage").classList.remove("marking");$("videoFile").value="";
@@ -33,6 +34,7 @@ async function load(file,options={}){
   await S.waitMetadata(v);if(my!==token)return;
   loaded=true;const analysis=options.analysis;
   if(analysis){
+   automatic=analysis.automatic||null;
    samples=Array.isArray(analysis.samples)?analysis.samples:[];marks=analysis.marks?{...emptyMarks(),...analysis.marks}:emptyMarks();phases=analysis.phases||{};
    if(["face","dtl"].includes(analysis.view))$("videoView").value=analysis.view;
    $("scaleCm").value=analysis.scaleCm??"";$("slowRatio").value=String(analysis.slowRatio||1);
@@ -40,7 +42,7 @@ async function load(file,options={}){
   $("clipEnd").value=Math.min(5,Number.isFinite(v.duration)?v.duration:5).toFixed(2);$("clipStart").value="0";
   $("videoSeek").max=Number.isFinite(v.duration)?v.duration:1;
   status(`影片已就緒 · ${v.videoWidth} × ${v.videoHeight} · ${Number.isFinite(v.duration)?v.duration.toFixed(2):"未知"} 秒。${samples.length?"已有 "+samples.length+" 筆姿態資料。":""}`);
-  controls();renderPhases();draw();updateEstimate();syncTime();S.emit("review-loaded",meta());
+  controls();renderPhases();draw();updateEstimate();syncTime();S.emit("review-loaded",meta());S.emit("review-ready",{...meta(),restored:!!analysis});
  }catch(e){if(my===token){status(e.message,true);controls();S.emit("review-loaded",meta());}}
 }
 function syncTime(){
@@ -65,7 +67,13 @@ function draw(){
  }
  // Wrist path remains an image-space path; it is not clubhead speed.
  const wrists=samples.filter(s=>s.lm&&P.valid(s.lm[15])&&P.valid(s.lm[16])).map(s=>({x:(s.lm[15].x+s.lm[16].x)/2,y:(s.lm[15].y+s.lm[16].y)/2,t:s.t}));
- if(wrists.length>1){ctx.globalAlpha=.4;poly(wrists,"#8bd9c0");ctx.globalAlpha=1;}
+ if(automatic?.path?.length){
+  ctx.globalAlpha=.55;const groups=new Set(automatic.path.map(p=>p.group));
+  for(const g of groups)poly(automatic.path.filter(p=>p.group===g),"#8bd9c0");ctx.globalAlpha=1;
+ }else if(wrists.length>1){ctx.globalAlpha=.4;poly(wrists,"#8bd9c0");ctx.globalAlpha=1;}
+ const candidate=automatic?.candidates?.[S.automation?.candidateIndex?.()||0];
+ if(candidate){ctx.save();ctx.setLineDash([5,5]);poly(candidate.points,"#dcb3e5",true);ctx.restore();}
+
  function arrow(points,color,label){
   if(!Array.isArray(points)||points.length!==2)return;
   poly(points,color);const a=xy(points[0]),b=xy(points[1]),angle=Math.atan2(b.y-a.y,b.x-a.x);
@@ -139,7 +147,7 @@ function estimate(){
  return{label:"calibrated_2d_projected_clubhead_speed_not_radar",maxMps:peak.mps,meanMps:segments.reduce((s,x)=>s+x.metres,0)/segments.reduce((s,x)=>s+x.seconds,0),peakVideoTime:peak.end,segments,metresPerPixel:scale,slowRatio:ratio};
 }
 function deliveryEstimate(){return S.projection.directionDifference(marks.target,marks.face,v?.videoWidth,v?.videoHeight);}
-function meta(){return {loaded,name:currentFile?.name||null,source,club:currentClub,shotId,duration:Number.isFinite(v?.duration)?v.duration:null,width:v?.videoWidth||0,height:v?.videoHeight||0};}
+function meta(){return {loaded,name:currentFile?.name||null,source,club:currentClub,shotId,duration:duration(),width:v?.videoWidth||0,height:v?.videoHeight||0};}
 function updateEstimate(){
  const face=deliveryEstimate();
  $("projectedFace").innerHTML=face?`${face.degrees.toFixed(1)}<small>\u00b0</small>`:"\u2014<small>\u00b0</small>";
@@ -174,35 +182,56 @@ async function analyzeFrame(){
   draw();
  }catch(e){if(ft===frameToken)status(e.message,true);}finally{frameBusy=false;controls();S.emit("review-changed");}
 }
-async function scan(){
+async function scan(options={}){
  if(!loaded||scanning||frameBusy||aiPending)return;
- const start=S.num($("clipStart").value),end=S.num($("clipEnd").value),fps=S.num($("sampleFPS").value)||15;
- if(start===null||end===null||start<0||end<=start||!Number.isFinite(v.duration)||end>v.duration+.01){status("請輸入影片範圍內有效的起點與終點。",true);return;}
- const count=Math.ceil((end-start)*fps);
- if(count>900){status("本次最多分析 900 個時間點，請縮短區段或降低取樣頻率。",true);return;}
+ const auto=options.automatic===true;
+ const start=auto?0:S.num($("clipStart").value),end=auto?duration():S.num($("clipEnd").value);
+ let fps=auto?Math.min(15,900/Math.max(end,1)):S.num($("sampleFPS").value)||15;
+ if(start===null||end===null||start<0||end<=start||!Number.isFinite(duration())||end>duration()+.01){status("\u5f71\u7247\u9577\u5ea6\u7121\u6548\uff0c\u8acb\u5148\u78ba\u8a8d\u53ef\u4ee5\u64ad\u653e\u3002",true);return;}
+ if(auto&&end>120){status("\u81ea\u52d5\u6a21\u5f0f\u652f\u63f4 120 \u79d2\u5167\u77ed\u7247\u3002\u8acb\u5148\u88c1\u5207\u55ae\u6b21\u63ee\u687f\uff0c\u6216\u4f7f\u7528\u9032\u968e\u5340\u6bb5\u6383\u63cf\u3002",true);return;}
+ const count=Math.min(900,Math.ceil((end-start)*fps));
+ if(!auto&&(end-start)*fps>900){status("\u8acb\u7e2e\u77ed\u5340\u6bb5\uff0c\u6bcf\u6b21\u6700\u591a 900 \u500b\u6642\u9593\u9ede\u3002",true);return;}
  v.pause();const original=v.currentTime,my=++scanToken,fileToken=token;
- chooseTool("none");scanning=true;samples=[];baseline=null;controls();$("analysisProgress").hidden=false;$("analysisProgress").value=0;
- let completed=0;
+ chooseTool("none");scanning=true;samples=[];automatic=null;baseline=null;controls();$("analysisProgress").hidden=false;$("analysisProgress").value=0;
+ const tracker=auto&&options.ballCandidates?new S.autoCore.BrightTracker():null;
+ const image=document.createElement("canvas"),k=Math.min(1,960/Math.max(v.videoWidth,v.videoHeight));
+ image.width=Math.round(v.videoWidth*k);image.height=Math.round(v.videoHeight*k);
+ const ic=image.getContext("2d",{willReadFrequently:true});
+ const small=document.createElement("canvas"),q=Math.min(1,640/image.width);small.width=Math.round(image.width*q);small.height=Math.round(image.height*q);const sc=small.getContext("2d",{willReadFrequently:true});
+ let completed=0,poseIssue=null,problem=null;
+ S.emit("auto-start",{automatic:auto,total:count});
  try{
   for(let i=0;i<count;i++){
    if(my!==scanToken||fileToken!==token)break;
-   const t=Math.min(start+i/fps,v.duration-.001);await S.seek(v,t);
+   const t=Math.min(start+i/fps,duration()-.001);await S.seek(v,t);
    if(my!==scanToken||fileToken!==token)break;
-   const lm=await runFrozen(msg=>{if(my===scanToken)status(msg);});
+   ic.drawImage(v,0,0,image.width,image.height);let lm=null;
+   if(tracker){sc.drawImage(image,0,0,small.width,small.height);tracker.feed(sc.getImageData(0,0,small.width,small.height),v.currentTime);}
+   if(!poseIssue){
+    aiPending=true;controls();
+    try{lm=await P.run(image,msg=>{if(my===scanToken){status(msg);S.emit("auto-status",{text:msg});}});}
+    catch(e){poseIssue=e.message;if(!auto||!tracker)throw e;}
+    finally{aiPending=false;controls();}
+   }
    if(my!==scanToken||fileToken!==token)break;
    if(lm&&baseline===null&&P.valid(lm[0]))baseline=lm[0].x;
    samples.push({t:v.currentTime,lm,metrics:P.metrics(lm,v.videoWidth,v.videoHeight,baseline)});completed++;
    $("analysisProgress").value=completed/count;
-   status(`分析 ${completed} / ${count} 個時間點 · ${samples.filter(s=>s.lm).length} 個畫面有人體資料。`);
+   status(`\u81ea\u52d5\u6383\u63cf ${completed} / ${count} \u500b\u6642\u9593\u9ede`);
+   S.emit("auto-progress",{completed,total:count,poseFrames:samples.filter(s=>s.lm).length});
    draw();syncTime();await S.delay(0);
   }
-  if(my===scanToken){status(`區段完成：${completed} 個時間點，${samples.filter(s=>s.lm).length} 個畫面取得人體姿態。取樣頻率不等同原始拍攝 FPS。`);}
-  else status(`已取消，保留 ${completed} 個已完成的時間點。`);
- }catch(e){status("分析已停止："+e.message,true);}
+ }catch(e){problem=e.message;status("\u5206\u6790\u5df2\u505c\u6b62\uff1a"+e.message,true);}
  finally{
-  scanning=false;controls();S.emit("review-changed");
-  if(my===scanToken&&fileToken===token&&loaded){try{await S.seek(v,original);}catch(_){}draw();syncTime();}
+  if(fileToken===token){
+   const canceled=my!==scanToken;
+   if(auto){automatic={...S.autoCore.summarize(samples,v.videoWidth,v.videoHeight,S.num($("slowRatio").value)||1),candidates:tracker?.results()||[],ballAttempted:!!tracker,unstableFrames:tracker?.unstable||0,poseIssue,problem,canceled,complete:!canceled&&!problem&&completed===count,samplingFPS:fps,totalRequested:count,version:"2.3.0",candidateMethod:"experimental-white-components-not-a-trained-golf-detector"};}
+   scanning=false;controls();S.emit("review-changed");S.emit("auto-complete",{automatic:auto,result:automatic});
+   if(!problem)status(canceled?"\u5df2\u505c\u6b62\uff0c\u4fdd\u7559\u5df2\u5b8c\u6210\u90e8\u5206\u3002":poseIssue?"\u4eba\u9ad4 AI \u672a\u6210\u529f\uff1b\u50c5\u5b8c\u6210\u5be6\u9a57\u6027\u767d\u8272\u7269\u6383\u63cf\u3002":"\u6383\u63cf\u5b8c\u6210\uff0c\u7d50\u679c\u5728\u5f71\u7247\u4e0b\u65b9\u3002",!!poseIssue);
+   if(my===scanToken&&loaded){try{await S.seek(v,original);}catch(_){}draw();syncTime();}
+  }
  }
+ return automatic;
 }
 function cancelScan(){scanToken++;frameToken++;scanning=false;if($("cancelAnalysis"))controls();S.emit("review-changed");}
 function renderPhases(){
@@ -220,7 +249,7 @@ async function save(){
  try{
   const existing=S.state.shots.find(s=>s.id===shotId);
   const shot=existing?{...existing}:S.createShot({source,club:currentClub,notes:"手機影片姿態／人工標記分析"});
-  const analysis=info();shot.mediaId=shot.id;shot.analysisSummary={sampleCount:samples.filter(s=>s.lm).length,view:analysis.view,projectedMaxMps:analysis.projected?.maxMps??null,manualFaceDirectionDeg:analysis.projectedDelivery?.degrees??null,phases:{...phases}};
+  const analysis=info();shot.mediaId=shot.id;shot.analysisSummary={sampleCount:samples.filter(s=>s.lm).length,view:analysis.view,projectedMaxMps:analysis.projected?.maxMps??null,manualFaceDirectionDeg:analysis.projectedDelivery?.degrees??null,automatic:analysis.automatic?{poseFrames:analysis.automatic.poseFrames,peakHandImageRate:analysis.automatic.peak?.value??null,ballCandidates:analysis.automatic.candidates.length}:null,phases:{...phases}};
   await S.media.put({id:shot.id,blob:currentFile,analysis});
   if(!S.saveShot(shot))throw new Error("數據寫入失敗；請匯出分析 JSON 和原始影片保留。");
   shotId=shot.id;S.emit("review-changed");status("影片與分析已儲存，可從紀錄重新開啟。");S.toast("影片與分析已儲存。");
@@ -269,5 +298,9 @@ function removeMark(kind,index){
 }
 async function gotoTime(t){if(!loaded||scanning)return;v.pause();try{await S.seek(v,t);syncTime();draw();}catch(e){status(e.message,true);}}
 function getState(){return {tool,pending:pending.length,scanning,frameBusy,aiPending,time:v?.currentTime||0,decoded:(v?.readyState||0)>=2,scaleCount:marks.scale.length,clubCount:marks.club.length,ballCount:marks.ball.length,targetCount:marks.target.length,faceCount:marks.face.length};}
-S.review={init,load,save,draw,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
+function confirmCandidate(index){
+ const candidate=automatic?.candidates?.[index];if(!candidate||scanning)return;
+ saveUndo();marks.ball=candidate.points.map(p=>({...p,source:"user-confirmed-experimental-track"}));draw();updateEstimate();
+}
+S.review={init,load,save,draw,getAutomatic:()=>automatic,confirmCandidate,cancelScan,step,gotoTime,removeMark,getState,analyzeFrame,scan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
 })();

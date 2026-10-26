@@ -1,25 +1,18 @@
-# v2.2 Test report
+# SwingLab V2.3 verification scope
 
-Browser: Chromium 144.0.7559.96 (Playwright).
-Passed checks: 84 / 84.
+## Passed
+- 10 pure logic checks: aspect-ratio-correct wrist projection, slow-motion scaling, low-confidence rejection, missing-pose gaps, stationary/empty cases, experimental bright-object candidates, no radar fields.
+- 22 Chromium flow assertions: auto-first default, upload auto-start, decoded synthetic-video analysis, charts, cancel/unlock, save-payload handoff, camera-to-recorded-clip handoff, and explicit model-download failure.
+- JavaScript syntax check for every production source file.
+- Mobile 390 x 844 overflow check and visual review. Desktop flow rendered at 1440 x 1000.
 
-## Verified
-- Real synthetic H.264 MP4 loaded through a file input and decoded in the browser.
-- Touch-style pointer events placed ball/club/reference/direction marks on the canvas.
-- Current-clip path, interval speed, direction plots and summary cards updated together.
-- Known geometry: 100 cm reference = 320 px; club displacement = 64 px over 0.1 s gives 7.2 km/h (2D). A 4x slow-motion correction gives 28.8 km/h.
-- Missing calibration does not generate a speed. Direction uses the original image aspect ratio.
-- Point replacement, deletion and undo; CSV/JSON/annotated PNG downloads.
-- Single-frame and scan failures leave manual tools usable. Scan cancellation releases the UI immediately.
-- AI input is a frozen decoded frame rather than a mutable video element.
-- 30 responsive layout checks: 6 routes at 375/390/430/768/1440 px.
-- Save/reopen UI wiring restores analysis, without copying projected speed into radar fields.
+## How the browser tests ran
+Browser navigation was blocked by the environment. The bundled HTML was executed using Playwright set_content on a blank document. Pose outputs, camera input, localStorage and media persistence were test doubles. The camera double supplied a real CanvasCaptureMediaStream to MediaRecorder, so recording and recorded-video decoding were exercised, but this was not a phone camera. Video input was a generated white-object fixture, not the user's footage.
 
-## Not verified / test adapters
-Save/reopen tests used an in-memory adapter for the media store and localStorage because the browser content test harness has no persistent web origin. These tests do NOT certify native browser IndexedDB persistence, storage quota, or reload recovery. Native storage failure was separately injected to ensure no false success.
-AI failure and pending-work tests used a mocked pose model. They do NOT certify model loading or pose detection accuracy.
-No physical iPhone, Safari camera, real golf clip, radar or Bluetooth device was used.
-The supplied synthetic test video is not included in the application, and no synthetic measurements are automatically generated for user videos.
+## NOT verified
+- Real MediaPipe network download or inference in this environment.
+- Actual iPhone/Safari camera permissions, recording performance or frame rate.
+- Production IndexedDB persistence (only the save payload and callback flow were exercised).
+- Golf-ball identification accuracy, clubhead tracking, radar-like ball flight, true clubhead speed or face angle.
 
-## Distribution
-The deployed index.html is self-contained for UI/styles/application logic. Only on-demand MediaPipe assets still use a network connection. The source/ directory is for development, not required deployment.
+The experimental tracker only associates small bright components. Its candidates must not be presented as confirmed golf-ball tracks. Production code contains no test-pose or camera stubs.

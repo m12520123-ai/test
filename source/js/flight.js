@@ -54,7 +54,7 @@ async function acceptRecording(record){
  try{
   const changed=await selectMode("video",{force:true});if(!changed||S.state.route!=="flight")return;
   context("\u9304\u5f71\u5df2\u5b8c\u6210\uff0c\u6b63\u5728\u8f09\u5165\u672c\u9801\u56de\u653e\u2026");
-  await S.review.load(record.blob,{analysis:record.analysis,shotId:record.shotId,source:"camera",club:record.info.club});
+  await S.review.load(record.blob,{analysis:record.analysis,shotId:record.shotId,source:"camera",club:record.info.club,duration:record.info.duration});
   if(S.state.route!=="flight")return;
   if(!S.review.getMeta().loaded){context("\u5f71\u7247\u7121\u6cd5\u5728\u6b64\u700f\u89bd\u5668\u56de\u653e\u3002\u53ef\u5207\u56de\u76f8\u6a5f\u5206\u9801\u53e6\u5b58\u539f\u59cb\u5f71\u7247\u3002",true);return;}
   context("\u9304\u5f71\u5df2\u63a5\u5230\u540c\u9801\u3002\u5148\u5b9a\u4f4d\u64ca\u7403\u756b\u9762\uff0c\u518d\u6a19\u8a18\u7403\u8def\u3001\u687f\u982d\u6216\u687f\u9762\u65b9\u5411\u3002");

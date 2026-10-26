@@ -111,7 +111,7 @@ async function finishRecording(){
  const type=recorder?.mimeType||chunks[0]?.type||"video/webm",blob=new Blob(chunks,{type});
  recState="idle";updateControls();
  if(!blob.size){status("沒有取得錄影資料，請重新錄製。",true);if(stopResolve){stopResolve();stopResolve=null;stopPending=null;}return;}
- lastRecording={blob,shotId:null,info:{...recordInfo,duration},analysis:{schema:"swinglab.analysis.v2",view:recordInfo.view,width:recordInfo.width,height:recordInfo.height,slowRatio:1,scaleCm:null,phases:{},marks:{ball:[],club:[],scale:[],lines:[],angles:[]},samples:recSamples.map(s=>({...s})),timingNote:"Pose timestamps are approximate relative to recording start, not hardware-synchronized."}};
+ lastRecording={blob,shotId:null,info:{...recordInfo,duration},analysis:{schema:"swinglab.analysis.v2",duration,view:recordInfo.view,width:recordInfo.width,height:recordInfo.height,slowRatio:1,scaleCm:null,phases:{},marks:{ball:[],club:[],scale:[],lines:[],angles:[]},samples:recSamples.map(s=>({...s})),timingNote:"Pose timestamps are approximate relative to recording start, not hardware-synchronized."}};
  $("liveResult").hidden=false;
  $("liveResultInfo").textContent=`${duration.toFixed(1)} 秒 · ${(blob.size/1024/1024).toFixed(1)} MB · ${recSamples.filter(s=>s.lm).length} 個人體姿態畫面。原始影片不燒錄骨架；回放頁會另行疊加。`;
  $("saveRecording").disabled=false;$("saveRecording").textContent="儲存到紀錄";status("錄影完成。可回放、保存紀錄或另存影片。");setState(stream?(aiReady?"AI LIVE":"CAMERA ON"):"相機未開啟");
@@ -141,7 +141,7 @@ function init(){
  };
  $("saveRecording").onclick=saveRecording;
  $("downloadRecording").onclick=()=>{if(lastRecording)S.download(lastRecording.blob,"swinglab-"+Date.now()+(lastRecording.blob.type.includes("mp4")?".mp4":".webm"));};
- $("openRecorded").onclick=async()=>{if(!lastRecording)return;if(S.state.route==="flight"){await S.flight.acceptRecording(lastRecording);return;}location.hash="video";await S.review.load(lastRecording.blob,{analysis:lastRecording.analysis,shotId:lastRecording.shotId,source:"camera",club:lastRecording.info.club});};
+ $("openRecorded").onclick=async()=>{if(!lastRecording)return;if(S.state.route==="flight"){await S.flight.acceptRecording(lastRecording);return;}location.hash="video";await S.review.load(lastRecording.blob,{analysis:lastRecording.analysis,shotId:lastRecording.shotId,source:"camera",club:lastRecording.info.club,duration:lastRecording.info.duration});};
  new ResizeObserver(()=>{if(lastLm){const ctx=P.setupOverlay(canvas);P.draw(ctx,lastLm,P.fit(video,canvas));}}).observe($("liveStage"));
  document.addEventListener("visibilitychange",()=>{if(document.hidden){if(recState==="recording")stopRecord();if(recState==="countdown")cancelCountdown();}});
  window.addEventListener("pagehide",()=>{++runToken;if(recorder?.state==="recording")recorder.stop();if(stream)stream.getTracks().forEach(t=>t.stop());});
