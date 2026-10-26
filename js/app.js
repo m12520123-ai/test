@@ -10,7 +10,7 @@ const NAV=[
  ["history","history","紀錄與比較","紀錄","YOUR PRACTICE JOURNAL","讓進步，有跡可循。","保存每一次練習，找出穩定的改變。"],
  ["settings","settings","設定與裝置","設定","YOUR WORKSPACE","依你的習慣，準備就緒。","管理單位、資料與儲存空間。"]
 ];
-let rangeScene,flightScene,lastFocus=null,comparisonURLs=[];
+let rangeScene,flightScene,lastFocus=null,comparisonURLs=[],routeGeneration=0;
 const toMetric=(key,shot,cls="stat-card")=>{
  const f=S.field(key),val=S.value(shot,key),u=S.unit(key);
  return `<div class="${cls}"><div class="metric-label">${S.esc(f.label)}<small>${S.esc(f.en)}</small></div><div class="metric-value">${S.format(key,val)}<small>${u}</small></div><div class="metric-source">${S.source(shot,key)}</div></div>`;
@@ -22,7 +22,7 @@ function fillClubs(){
  ["overviewClub","historyClub"].forEach(id=>$(id).insertAdjacentHTML("beforeend",options));
 }
 function refreshCommon(){
- const dataPage=["overview","history","flight"].includes(S.state.route);
+ const dataPage=["overview","history"].includes(S.state.route)||(S.state.route==="flight"&&$("flightExternalDetails").open);
  $("sourceChip").textContent=S.state.demo&&dataPage?"示範資料":"本機資料";
  $("demoToggle").textContent=S.state.demo?"返回我的資料":"體驗示範";
  $("demoBanner").hidden=!(S.state.demo&&dataPage);
@@ -105,18 +105,21 @@ async function storageInfo(){
 }
 function refresh(){refreshCommon();if(S.state.route==="overview")renderOverview();if(S.state.route==="flight")renderFlight();if(S.state.route==="history")renderHistory();}
 async function route(){
+ const generation=++routeGeneration,previous=S.state.route;
  const requested=location.hash.slice(1)||"overview",next=NAV.some(n=>n[0]===requested)?requested:"overview";
- if(S.state.route==="capture"&&next!=="capture"&&S.live.isActive()){
-  if(S.live.isRecording()&&!confirm("切換頁面會停止錄影並關閉相機。繼續？")){history.replaceState(null,"","#capture");return;}
-  await S.live.close();
+ if(next!==previous&&S.live.isActive()){
+  if(S.live.isRecording()&&!confirm("切換頁面會停止錄影並關閉相機。繼續？")){history.replaceState(null,"","#"+previous);return;}
+  S.flight.suppress(true);await S.live.close();S.flight.suppress(false);
  }
- if(S.state.route==="video"&&next!=="video")S.review.pause();
+ if(generation!==routeGeneration)return;
+ if(previous!==next)S.review.pause();
+ S.flight.mount(next);
  rangeScene?.stop();flightScene?.stop();
  S.state.route=next;const meta=NAV.find(n=>n[0]===next);
  document.querySelector(".desktop-nav").innerHTML=navHTML();document.querySelector(".mobile-nav").innerHTML=navHTML(true);
  document.querySelectorAll(".page").forEach(p=>{const active=p.id==="page-"+next;p.hidden=!active;p.classList.toggle("active",active);});
  $("breadcrumb").textContent=meta[2];$("pageEyebrow").textContent=meta[4];$("pageTitle").textContent=meta[5];$("pageDescription").textContent=meta[6];
- refresh();if(next==="settings")renderSettings();if(next==="video")S.review.draw();
+ refresh();if(next==="settings")renderSettings();if(next==="video"||next==="flight")S.review.draw();
  window.scrollTo({top:0,behavior:"instant"});
 }
 function modal(id){
@@ -237,7 +240,7 @@ async function migrate(){
 function init(){
  S.hydrate();fillClubs();
  rangeScene=new S.visuals.RangeScene($("rangeCanvas"));flightScene=new S.visuals.RangeScene($("flightCanvas"));
- S.review.init();S.live.init();
+ S.review.init();S.live.init();S.flight.init();
  document.querySelectorAll('[data-action="new-shot"]').forEach(b=>b.onclick=()=>showShot());
  $("demoToggle").onclick=()=>{S.state.demo=!S.state.demo;S.state.selected=null;S.state.comparison.clear();refresh();};$("leaveDemo").onclick=()=>{S.state.demo=false;S.state.selected=null;S.state.comparison.clear();refresh();};
  $("overviewClub").onchange=e=>{S.state.filterClub=e.target.value;renderOverview();};

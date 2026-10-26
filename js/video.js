@@ -3,10 +3,11 @@
 "use strict";
 const S=window.SL,$=S.$,P=S.pose;
 let v,c,ctx,currentFile=null,url=null,token=0,scanToken=0,scanning=false,tool="none",baseline=null,loaded=false,shotId=null,source="video";
-let samples=[],marks={ball:[],club:[],scale:[],lines:[],angles:[]},phases={},undo=[],pending=[],seekBusy=false,paintRAF=0;
-const emptyMarks=()=>({ball:[],club:[],scale:[],lines:[],angles:[]});
+let currentClub="7I";
+let samples=[],marks={ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]},phases={},undo=[],pending=[],seekBusy=false,paintRAF=0;
+const emptyMarks=()=>({ball:[],club:[],scale:[],lines:[],angles:[],target:[],face:[]});
 function status(t,error=false){$("videoStatus").textContent=t;$("videoStatus").className="status-line"+(error?" error":"");}
-function info(){return{view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),schema:"swinglab.analysis.v2"};}
+function info(){return{view:$("videoView").value,slowRatio:S.num($("slowRatio").value)||1,scaleCm:S.num($("scaleCm").value),width:v.videoWidth,height:v.videoHeight,phases:{...phases},marks:JSON.parse(JSON.stringify(marks)),samples:samples.map(s=>({...s})),projected:estimate(),projectedDelivery:deliveryEstimate(),schema:"swinglab.analysis.v2"};}
 function controls(){
  ["analyzeVideo","analyzeClip","stepBack","stepNext","saveVideoShot","exportAnalysis","snapshotVideo","downloadReviewSource"].forEach(id=>$(id).disabled=!loaded||scanning);
  $("videoFile").disabled=scanning;$("videoSeek").disabled=!loaded||scanning;$("cancelAnalysis").hidden=!scanning;
@@ -16,12 +17,13 @@ function controls(){
 async function load(file,options={}){
  if(!file)return;
  if(!(file instanceof Blob)||file.size===0){status("選到的影片是空檔案。",true);return;}
- cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";
+ cancelScan();const my=++token;v.pause();currentFile=file;loaded=false;shotId=options.shotId||null;source=options.source||"video";currentClub=options.club||S.state.shots.find(s=>s.id===shotId)?.club||"7I";
  samples=[];marks=emptyMarks();phases={};pending=[];undo=[];baseline=null;tool="none";
+ $("scaleCm").value="100";$("slowRatio").value="1";$("playbackRate").value="1";v.playbackRate=1;
  if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);v.src=url;
  $("videoPlaceholder").hidden=true;$("reviewStage").classList.remove("marking");$("videoFile").value="";
  $("annotationTools").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.tool==="none"));
- $("analysisProgress").hidden=true;controls();status("正在讀取影片，與 AI 模型載入分開處理…");v.load();
+ $("analysisProgress").hidden=true;controls();status("正在讀取影片，與 AI 模型載入分開處理…");v.load();S.emit("review-loaded",meta());
  try{
   await S.waitVideo(v);if(my!==token)return;
   loaded=true;const analysis=options.analysis;
@@ -33,8 +35,8 @@ async function load(file,options={}){
   $("clipEnd").value=Math.min(5,Number.isFinite(v.duration)?v.duration:5).toFixed(2);$("clipStart").value="0";
   $("videoSeek").max=Number.isFinite(v.duration)?v.duration:1;
   status(`影片已就緒 · ${v.videoWidth} × ${v.videoHeight} · ${Number.isFinite(v.duration)?v.duration.toFixed(2):"未知"} 秒。${samples.length?"已有 "+samples.length+" 筆姿態資料。":""}`);
-  controls();renderPhases();draw();updateEstimate();syncTime();
- }catch(e){if(my===token){status(e.message,true);controls();}}
+  controls();renderPhases();draw();updateEstimate();syncTime();S.emit("review-loaded",meta());
+ }catch(e){if(my===token){status(e.message,true);controls();S.emit("review-loaded",meta());}}
 }
 function syncTime(){
  if(!v)return;
@@ -59,6 +61,12 @@ function draw(){
  // Wrist path remains an image-space path; it is not clubhead speed.
  const wrists=samples.filter(s=>s.lm&&P.valid(s.lm[15])&&P.valid(s.lm[16])).map(s=>({x:(s.lm[15].x+s.lm[16].x)/2,y:(s.lm[15].y+s.lm[16].y)/2,t:s.t}));
  if(wrists.length>1){ctx.globalAlpha=.4;poly(wrists,"#8bd9c0");ctx.globalAlpha=1;}
+ function arrow(points,color,label){
+  if(!Array.isArray(points)||points.length!==2)return;
+  poly(points,color);const a=xy(points[0]),b=xy(points[1]),angle=Math.atan2(b.y-a.y,b.x-a.x);
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x-10*Math.cos(angle-.45),b.y-10*Math.sin(angle-.45));ctx.lineTo(b.x,b.y);ctx.lineTo(b.x-10*Math.cos(angle+.45),b.y-10*Math.sin(angle+.45));ctx.stroke();ctx.fillStyle=color;ctx.font="11px -apple-system";ctx.fillText(label,b.x+7,b.y-7);
+ }
+ arrow(marks.target,"#80cbd8","TARGET");arrow(marks.face,"#e8b8ed","FACE / MANUAL");
  poly(marks.ball,"#f4d47b",true);poly(marks.club,"#c8f56a",true);poly(marks.scale,"#86cbd9");
  marks.lines.forEach(a=>poly(a,"#e8cf95"));
  marks.angles.forEach(a=>{poly(a,"#dcb3e5");if(a.length===3){const A={...a[0],visibility:1},B={...a[1],visibility:1},C={...a[2],visibility:1};const n=P.angle(A,B,C,v.videoWidth,v.videoHeight),q=xy(B);ctx.font="12px -apple-system";ctx.fillStyle="#f3dbfa";ctx.fillText(n.toFixed(1)+"°",q.x+10,q.y+18);}});
@@ -76,7 +84,9 @@ function chooseTool(which){
   club:"桿頭標記：點真正的桿頭，不是手腕。在不同時間重複標記，至少兩點才能計算投影速度。",
   scale:"依序點出已知實際長度的兩端，參考物須與桿頭運動在相近深度；再填入下方長度。",
   line:"點兩個位置建立參考線；此線會保留在各個時間點，供動作比較。",
-  angle:"依序點三個位置，第二個點是角度頂點。數值為畫面投影角度。"
+  angle:"依序點三個位置，第二個點是角度頂點。數值為畫面投影角度。",
+  target:"\u76ee\u6a19\u65b9\u5411\uff1a\u5148\u9ede\u8d77\u9ede\u3001\u518d\u9ede\u6307\u5411\u76ee\u6a19\u7684\u7d42\u9ede\u3002\u50c5\u8a18\u9304\u756b\u9762\u4e0a\u7684\u53c3\u8003\u65b9\u5411\uff0c\u8acb\u56fa\u5b9a\u93e1\u982d\u3002",
+  face:"\u687f\u9762\u671d\u5411\uff1a\u5148\u5b9a\u683c\uff0c\u518d\u7531\u687f\u9762\u4e2d\u5fc3\u9ede\u5411\u4f60\u5224\u8b80\u7684\u6b63\u524d\u65b9\uff08\u4e0d\u662f\u6cbf\u687f\u9762\u908a\u7de3\uff09\u3002\u8f38\u51fa\u50c5\u662f\u5169\u689d\u624b\u756b\u65b9\u5411\u7dda\u7684\u593e\u89d2\uff0c\u975e\u81ea\u52d5\u8fa8\u8b58\u6216\u771f\u5be6 Face Angle\u3002"
  };
  $("toolHelp").textContent=help[tool];draw();
 }
@@ -90,11 +100,13 @@ function annotate(e){
   saveUndo();const arr=marks[tool],at=arr.findIndex(a=>Math.abs(a.t-p.t)<.0005);if(at>=0)arr[at]=p;else arr.push(p);
   arr.sort((a,b)=>a.t-b.t);
  }else{
+  if(pending.length&&["target","face"].includes(tool)&&Math.abs(pending[0].t-p.t)>.001)pending=[];
   pending.push(p);
   const needed=tool==="angle"?3:2;
   if(pending.length===needed){
    saveUndo();
    if(tool==="scale"){const dist=Math.hypot((pending[0].x-pending[1].x)*v.videoWidth,(pending[0].y-pending[1].y)*v.videoHeight);if(dist<3){S.toast("比例點太靠近，請重新設定較長的參考距離。");pending=[];draw();return;}marks.scale=pending.slice();}
+   else if(["target","face"].includes(tool))marks[tool]=pending.slice();
    else if(tool==="line")marks.lines.push(pending.slice());else marks.angles.push(pending.slice());
    pending=[];
   }
@@ -116,7 +128,13 @@ function estimate(){
  const peak=segments.reduce((a,b)=>a.mps>b.mps?a:b);
  return{label:"calibrated_2d_projected_clubhead_speed_not_radar",maxMps:peak.mps,meanMps:segments.reduce((s,x)=>s+x.metres,0)/segments.reduce((s,x)=>s+x.seconds,0),peakVideoTime:peak.end,segments,metresPerPixel:scale,slowRatio:ratio};
 }
+function deliveryEstimate(){return S.projection.directionDifference(marks.target,marks.face,v?.videoWidth,v?.videoHeight);}
+function meta(){return {loaded,name:currentFile?.name||null,source,club:currentClub,shotId,duration:Number.isFinite(v?.duration)?v.duration:null,width:v?.videoWidth||0,height:v?.videoHeight||0};}
 function updateEstimate(){
+ const face=deliveryEstimate();
+ $("projectedFace").innerHTML=face?`${face.degrees.toFixed(1)}<small>\u00b0</small>`:"\u2014<small>\u00b0</small>";
+ $("projectedFaceInfo").textContent=face?`\u5b9a\u683c ${face.frameTime?.toFixed(3)??"\u2014"}s \u00b7 \u76f8\u5c0d\u76ee\u6a19\u65b9\u5411\uff0c\u756b\u9762\u9006\u6642\u91dd\u70ba\u6b63\u3002\u50c5\u6bd4\u8f03\u624b\u756b\u65b9\u5411\uff0c\u4e0d\u5224\u5b9a\u771f\u5be6\u687f\u9762\u958b\u9589\u3002`:"\u5404\u9ede\u5169\u9ede\u8a2d\u5b9a\u76ee\u6a19\u65b9\u5411\u548c\u687f\u9762\u671d\u5411\u7bad\u982d\u3002\u4e0d\u7b49\u65bc\u771f\u5be6\u687f\u9762\u958b\u9589\u89d2\u3002";
+ S.emit("review-changed");
  const est=estimate();
  $("projectedSpeed").innerHTML=est?`${(est.maxMps*3.6).toFixed(1)}<small> km/h</small>`:"—<small> km/h</small>";
  $("projectedInfo").textContent=est?`最大區間平均值；全段平均 ${(est.meanMps*3.6).toFixed(1)} km/h。${est.segments.length} 個有效時段。${est.maxMps>100?"數值偏高，請核對比例、時點與慢動作倍率。":"僅為標記點的 2D 投影速度，不是擊球瞬間真實桿速。"}`
@@ -184,11 +202,11 @@ async function save(){
  const button=$("saveVideoShot");button.disabled=true;
  try{
   const existing=S.state.shots.find(s=>s.id===shotId);
-  const shot=existing?{...existing}:S.createShot({source,club:"7I",notes:"手機影片姿態／人工標記分析"});
-  const analysis=info();shot.mediaId=shot.id;shot.analysisSummary={sampleCount:samples.filter(s=>s.lm).length,view:analysis.view,projectedMaxMps:analysis.projected?.maxMps??null,phases:{...phases}};
+  const shot=existing?{...existing}:S.createShot({source,club:currentClub,notes:"手機影片姿態／人工標記分析"});
+  const analysis=info();shot.mediaId=shot.id;shot.analysisSummary={sampleCount:samples.filter(s=>s.lm).length,view:analysis.view,projectedMaxMps:analysis.projected?.maxMps??null,manualFaceDirectionDeg:analysis.projectedDelivery?.degrees??null,phases:{...phases}};
   await S.media.put({id:shot.id,blob:currentFile,analysis});
   if(!S.saveShot(shot))throw new Error("數據寫入失敗；請匯出分析 JSON 和原始影片保留。");
-  shotId=shot.id;S.toast("影片與分析已儲存至這個瀏覽器。請定期另存備份。");
+  shotId=shot.id;S.emit("review-changed");S.toast("影片與分析已儲存至這個瀏覽器。請定期另存備份。");
  }catch(e){S.toast("未完成儲存："+e.message);}finally{controls();}
 }
 async function snapshot(){
@@ -199,7 +217,7 @@ async function snapshot(){
  const font=Math.max(16,out.width/45);oc.fillStyle="#07140fbd";oc.fillRect(0,0,out.width,font*3.8);oc.fillStyle="#d8f5a4";oc.font=`${font}px sans-serif`;oc.fillText("SWINGLAB / 2D VIDEO REVIEW",font,font*1.5);oc.fillStyle="#e0ece6";oc.font=`${font*.7}px sans-serif`;oc.fillText(`t=${v.currentTime.toFixed(3)}s  |  Manual marks / image estimates, not radar`,font,font*2.7);
  out.toBlob(blob=>{if(blob)S.download(blob,"swinglab-review-"+Date.now()+".png");else S.toast("截圖匯出失敗。");},"image/png");
 }
-function playbackDraw(){cancelAnimationFrame(paintRAF);if(!v.paused&&S.state.route==="video"){draw();syncTime();paintRAF=requestAnimationFrame(playbackDraw);}}
+function playbackDraw(){cancelAnimationFrame(paintRAF);if(!v.paused&&(S.state.route==="video"||(S.state.route==="flight"&&S.flight?.mode()==="video"))){draw();syncTime();paintRAF=requestAnimationFrame(playbackDraw);}}
 function init(){
  v=$("reviewVideo");c=$("reviewOverlay");
  P.renderMetrics($("videoMetrics"));
@@ -225,5 +243,5 @@ function init(){
  $("videoView").onchange=draw;
  new ResizeObserver(()=>draw()).observe($("reviewStage"));controls();
 }
-S.review={init,load,save,draw,cancelScan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,isScanning:()=>scanning};
+S.review={init,load,save,draw,cancelScan,pause:()=>{if(v)v.pause();cancelScan();},getInfo:info,getMeta:meta,chooseTool,isScanning:()=>scanning};
 })();

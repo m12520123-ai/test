@@ -20,3 +20,31 @@
  .mini-stats{gap:6px}
 }
 @media(max-width:360px){.shot-panel .metrics-featured .metric-value{font-size:21px}.featured-metric:nth-child(n+2){padding-left:5px}.metric-value small{font-size:7px}.range-topline .chip{font-size:7px}}
+
+/* v2.1 same-page video/camera flight workspace */
+.flight-workbench{border:1px solid #36504b;border-radius:20px;background:linear-gradient(125deg,#182b26,#111e21 72%);padding:24px;margin-bottom:18px}
+.flight-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.flight-intro h2{font-size:23px;letter-spacing:-.7px}.flight-intro p:not(.eyebrow){font-size:13px;color:#a8bcb3;margin-top:7px;line-height:1.75}.flight-intro .eyebrow{color:#b5d08a}
+.flight-mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:21px}
+.flight-mode-tabs button{min-width:0;display:flex;align-items:center;gap:13px;background:#102021;border:1px solid #314647;color:#a3b7b6;border-radius:13px;padding:15px 18px;text-align:left;transition:background .2s}
+.flight-mode-tabs button>.icon{width:24px;height:24px}.flight-mode-tabs b{font-size:15px;font-weight:650;display:block}.flight-mode-tabs small{font-size:11px;display:block;font-weight:400;margin-top:2px;color:#8fa5a2}
+.flight-mode-tabs button.active{background:#c8f56a;border-color:#c8f56a;color:#1b301a}.flight-mode-tabs button.active small{color:#496136}
+.flight-steps{display:flex;gap:26px;margin-top:20px;color:#a1b4ab;font-size:11px;flex-wrap:wrap}.flight-steps b{color:#c4dcaa;font-size:10px;font-family:monospace;letter-spacing:1px;margin-right:7px}
+.flight-boundary{border-top:1px solid #30453c;margin-top:16px;padding-top:13px;font-size:11px;color:#8fa99c;line-height:1.8}
+.flight-context{font-size:12px;color:#a9bab4;margin:0 0 16px;padding:0 2px;overflow-wrap:anywhere}.flight-context.error{color:var(--danger)}
+.flight-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:0 0 18px;border:1px solid #2e4241;border-radius:15px;background:#2e4241;overflow:hidden}
+.flight-summary>div{background:#152322;padding:15px 17px;min-width:0}.flight-summary>div>span{font-size:11px;color:#96aba4;display:block}.flight-summary strong{display:block;font-size:27px;line-height:1.6;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.7px}.flight-summary strong small{font-size:11px;font-weight:400;letter-spacing:0;margin-left:5px;color:#a4bab2}.flight-summary>div>small{font-size:9px;color:#7f968d;display:block}
+.flight-host{scroll-margin-top:20px;margin-bottom:22px}.flight-host .media-stage{max-height:65vh}.face-estimate{background:#291f2d;border-color:#49344b}.face-estimate>strong{color:#ebc6ee}
+.flight-external{padding:19px;margin-top:26px;margin-bottom:24px;background:#0f1a1c}.flight-external>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}.flight-external>summary::-webkit-details-marker{display:none}.flight-external>summary b{font-size:14px;font-weight:600}.flight-external>summary small{font-size:11px;color:#7f9697;display:block;margin-top:3px}.flight-external[open]>summary{margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--line)}.flight-external>.workspace-bar{align-items:center}.flight-external #flightShot{max-width:100%}.flight-external>.workspace-bar h2{font-size:15px}.flight-external .panel{background:#121d1e}
+@media(max-width:1100px){.flight-summary strong{font-size:23px}.flight-summary>div{padding:13px 12px}}
+@media(max-width:720px){
+ .flight-workbench{padding:17px;border-radius:17px;margin-bottom:14px}.flight-intro h2{font-size:18px}.flight-intro p:not(.eyebrow){font-size:11px}.flight-intro>.chip{display:none}.flight-mode-tabs{gap:7px;margin-top:15px}.flight-mode-tabs button{padding:13px 10px;gap:9px;min-height:68px}.flight-mode-tabs button>.icon{width:20px;height:20px}.flight-mode-tabs b{font-size:13px}.flight-mode-tabs small{font-size:9px}.flight-steps{gap:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));font-size:9px;margin-top:16px}.flight-steps b{display:block;margin:0 0 2px}.flight-boundary{font-size:10px;padding-top:11px;margin-top:12px}.flight-summary{grid-template-columns:1fr 1fr;border-radius:13px;margin-bottom:13px}.flight-summary>div{padding:11px 12px}.flight-summary strong{font-size:24px}.flight-summary>div>span{font-size:10px}.flight-summary>div>small{font-size:9px}.flight-context{font-size:11px;margin-bottom:13px}.flight-host{scroll-margin-top:10px}.flight-external{padding:14px;border-radius:16px}.flight-external>summary b{font-size:12px}.flight-external>summary small{font-size:10px}.flight-external>summary>.chip{font-size:8px;flex-shrink:0}.flight-external .workspace-bar>.select{flex:1;min-width:0}.flight-external .workspace-bar>div{flex-basis:100%}
+ .flight-host .tool-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.flight-host .tool-grid button{font-size:10px;padding:10px 3px}
+}
+@media(max-width:720px){
+ .flight-intro{display:none}.flight-mode-tabs{margin-top:0}.flight-steps{display:none}
+ .flight-host .camera-panel{display:flex;flex-direction:column}
+ .flight-host .camera-panel>.panel-top{order:0}.flight-host .camera-panel>.control-row{order:1}
+ .flight-host .camera-panel>.capture-actions{order:2;margin-top:12px}
+ .flight-host .camera-panel>.media-stage{order:3}.flight-host .camera-panel>.status-line{order:4}
+}

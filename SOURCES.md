@@ -27,3 +27,7 @@ MediaPipe Pose 套件以 Apache-2.0 發佈，其授權與聲明以原套件為�
 介面、圖表、圖示及網站控制程式為此次新撰寫內容，沒有複製產品廣告照片或品牌標誌。
 字型使用使用者裝置的系統字型，本包不含字型檔。
 資料圖表不是經驗驗證的高爾夫飛行物理模型。
+
+## v2.1 camera integration references
+- MDN getUserMedia (HTTPS, permission, facing mode): https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+- Google Pose (human landmarks, not clubface or ball tracking): https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/web_js

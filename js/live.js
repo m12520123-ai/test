@@ -3,7 +3,7 @@
 "use strict";
 const S=window.SL,$=S.$,P=S.pose;
 let video,canvas,stream=null,runToken=0,raf=0,opening=false,aiReady=false,baseline=null,lastLm=null;
-let recorder=null,recState="idle",countToken=0,chunks=[],recSamples=[],recStart=0,recordInfo=null,lastRecording=null,recTimer=0,stopResolve=null,stopPending=null,wake=null;
+let recorder=null,recState="idle",countToken=0,chunks=[],recSamples=[],recStart=0,recordInfo=null,lastRecording=null,recEnd=0,recTimer=0,stopResolve=null,stopPending=null,wake=null;
 function status(msg,error=false){$("liveStatus").textContent=msg;$("liveStatus").className="status-line"+(error?" error":"");}
 function setState(text){$("liveState").textContent=text;}
 function updateControls(){
@@ -12,7 +12,7 @@ function updateControls(){
  $("stopCamera").disabled=!has&&!opening;
  $("cameraFacing").disabled=opening||busy||has;
  $("liveView").disabled=busy;$("liveClub").disabled=busy;
- $("recordButton").disabled=(recState==="idle"&&(!has||!aiReady||!window.MediaRecorder))||recState==="stopping";
+ $("recordButton").disabled=(recState==="idle"&&(!has||!window.MediaRecorder))||recState==="stopping";
  $("recordButton").classList.toggle("recording",recState==="recording");
  $("recordButton").innerHTML=recState==="countdown"?"取消倒數":recState==="recording"?"停止錄影":recState==="stopping"?"正在整理影片…":"<i></i>3 秒倒數錄影";
  $("resetBaseline").disabled=!has||!aiReady;
@@ -28,7 +28,7 @@ async function open(){
   stream=s;video.srcObject=s;await video.play();await S.waitVideo(video);
   if(my!==runToken)return;
   $("livePlaceholder").hidden=true;baseline=null;aiReady=false;lastLm=null;
-  setState("相機就緒 · AI 載入中");status("相機已開啟，正在載入人體模型。");
+  setState("相機就緒 · AI 載入中");updateControls();status("相機已開啟，正在載入人體模型。");
   s.getVideoTracks()[0].addEventListener("ended",()=>{if(stream){close();status("相機串流已中斷，請重新開啟。",true);}},{once:true});
   loop(my);
  }catch(e){
@@ -73,7 +73,7 @@ function cancelCountdown(){countToken++;recState="idle";$("countdown").textConte
 async function startRecord(){
  if(recState==="countdown"){cancelCountdown();return;}
  if(recState==="recording"){stopRecord();return;}
- if(recState!=="idle"||!stream||!aiReady)return;
+ if(recState!=="idle"||!stream)return;
  if(!window.MediaRecorder){status("此瀏覽器不支援網頁錄影，仍可使用姿態分析。",true);return;}
  recState="countdown";const my=++countToken;updateControls();
  for(let i=3;i>=1;i--){if(my!==countToken||!stream)return;$("countdown").textContent=i;await S.delay(1000);}
@@ -82,13 +82,13 @@ async function startRecord(){
  for(const m of ["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp8","video/webm"]){try{if(MediaRecorder.isTypeSupported(m)){mime=m;break;}}catch(_){}}
  try{
   try{recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});}catch(_){recorder=new MediaRecorder(stream);}
-  chunks=[];recSamples=[];baseline=null;recStart=performance.now();
+  chunks=[];recSamples=[];baseline=null;recStart=performance.now();recEnd=0;
   recordInfo={id:S.id(),view:$("liveView").value,club:$("liveClub").value,width:video.videoWidth,height:video.videoHeight,createdAt:new Date().toISOString()};
   recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
   recorder.onerror=e=>{status("錄影錯誤："+(e.error?.message||"無法完成錄影"),true);stopRecord();};
   recorder.onstop=finishRecording;
   recorder.start(300);recState="recording";
-  setState("REC · AI LIVE");$("liveResult").hidden=true;updateControls();
+  setState(aiReady?"REC · AI LIVE":"REC · RAW VIDEO");$("liveResult").hidden=true;updateControls();
   recTimer=setInterval(()=>{const seconds=(performance.now()-recStart)/1000;$("recClock").textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(Math.floor(seconds%60)).padStart(2,"0");if(seconds>=S.state.settings.recordLimit)stopRecord();},200);
   try{if(navigator.wakeLock)wake=await navigator.wakeLock.request("screen");}catch(_){}
  }catch(e){recState="idle";status("無法開始錄影："+e.message,true);updateControls();}
@@ -97,7 +97,7 @@ async function stopRecord(){
  if(recState==="countdown"){cancelCountdown();return;}
  if(recState==="stopping")return stopPending;
  if(recState!=="recording"||!recorder||recorder.state==="inactive")return;
- recState="stopping";clearInterval(recTimer);updateControls();
+ recState="stopping";recEnd=performance.now();clearInterval(recTimer);updateControls();
  stopPending=new Promise(resolve=>{
   stopResolve=resolve;
   try{recorder.stop();}catch(e){recState="idle";updateControls();resolve();}
@@ -106,7 +106,7 @@ async function stopRecord(){
 }
 async function finishRecording(){
  clearInterval(recTimer);
- const duration=(performance.now()-recStart)/1000;
+ const duration=((recEnd||performance.now())-recStart)/1000;
  if(wake){try{await wake.release();}catch(_){}wake=null;}
  const type=recorder?.mimeType||chunks[0]?.type||"video/webm",blob=new Blob(chunks,{type});
  recState="idle";updateControls();
@@ -114,9 +114,10 @@ async function finishRecording(){
  lastRecording={blob,shotId:null,info:{...recordInfo,duration},analysis:{schema:"swinglab.analysis.v2",view:recordInfo.view,width:recordInfo.width,height:recordInfo.height,slowRatio:1,scaleCm:null,phases:{},marks:{ball:[],club:[],scale:[],lines:[],angles:[]},samples:recSamples.map(s=>({...s})),timingNote:"Pose timestamps are approximate relative to recording start, not hardware-synchronized."}};
  $("liveResult").hidden=false;
  $("liveResultInfo").textContent=`${duration.toFixed(1)} 秒 · ${(blob.size/1024/1024).toFixed(1)} MB · ${recSamples.filter(s=>s.lm).length} 個人體姿態畫面。原始影片不燒錄骨架；回放頁會另行疊加。`;
- $("saveRecording").disabled=false;$("saveRecording").textContent="儲存到紀錄";status("錄影完成。可回放、保存紀錄或另存影片。");setState(stream?"AI LIVE":"相機未開啟");
+ $("saveRecording").disabled=false;$("saveRecording").textContent="儲存到紀錄";status("錄影完成。可回放、保存紀錄或另存影片。");setState(stream?(aiReady?"AI LIVE":"CAMERA ON"):"相機未開啟");
  if(S.state.settings.autoStore)await saveRecording();
  if(stopResolve){stopResolve();stopResolve=null;stopPending=null;}
+ S.emit("recorded",lastRecording);
 }
 async function saveRecording(){
  if(!lastRecording)return;
@@ -140,7 +141,7 @@ function init(){
  };
  $("saveRecording").onclick=saveRecording;
  $("downloadRecording").onclick=()=>{if(lastRecording)S.download(lastRecording.blob,"swinglab-"+Date.now()+(lastRecording.blob.type.includes("mp4")?".mp4":".webm"));};
- $("openRecorded").onclick=async()=>{if(!lastRecording)return;location.hash="video";await S.review.load(lastRecording.blob,{analysis:lastRecording.analysis,shotId:lastRecording.shotId,source:"camera"});};
+ $("openRecorded").onclick=async()=>{if(!lastRecording)return;if(S.state.route==="flight"){await S.flight.acceptRecording(lastRecording);return;}location.hash="video";await S.review.load(lastRecording.blob,{analysis:lastRecording.analysis,shotId:lastRecording.shotId,source:"camera",club:lastRecording.info.club});};
  new ResizeObserver(()=>{if(lastLm){const ctx=P.setupOverlay(canvas);P.draw(ctx,lastLm,P.fit(video,canvas));}}).observe($("liveStage"));
  document.addEventListener("visibilitychange",()=>{if(document.hidden){if(recState==="recording")stopRecord();if(recState==="countdown")cancelCountdown();}});
  window.addEventListener("pagehide",()=>{++runToken;if(recorder?.state==="recording")recorder.stop();if(stream)stream.getTracks().forEach(t=>t.stop());});

@@ -7,7 +7,7 @@
 <meta name="description" content="手機高爾夫姿態分析、影片標記、練習紀錄與彈道資料視覺化。">
 <title>SwingLab — 高爾夫分析工作室</title>
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=2.0.0">
+<link rel="stylesheet" href="styles.css?v=2.1.0">
 </head>
 <body>
 <div id="app">
@@ -15,7 +15,7 @@
 <a class="brand" href="#overview" aria-label="SwingLab 首頁"><span class="brand-mark">S<span></span></span><span>SWING<span class="brand-light">LAB</span><small>GOLF ANALYTICS STUDIO</small></span></a>
 <div class="side-label">YOUR PRACTICE, REDEFINED</div>
 <nav class="desktop-nav" aria-label="主要功能"></nav>
-<div class="sidebar-bottom"><span class="connection-dot"></span>本機分析 · 資料由你掌握<small>STUDIO EDITION / V2.0</small></div>
+<div class="sidebar-bottom"><span class="connection-dot"></span>本機分析 · 資料由你掌握<small>STUDIO EDITION / V2.1</small></div>
 </aside>
 <main class="main">
 <header class="topbar"><div class="mobile-brand"><span class="brand-mark">S<span></span></span><b>SWINGLAB</b></div><div class="breadcrumb"><span>WORKSPACE</span><span class="slash">/</span><b id="breadcrumb">練習總覽</b></div><div class="header-actions"><span id="sourceChip" class="chip subtle">本機資料</span><button class="btn ghost small" id="demoToggle" type="button">體驗示範</button><a href="#settings" class="avatar" aria-label="設定">SL</a></div></header>
@@ -55,15 +55,35 @@
 <div class="control-row compact"><label>分析起點（秒）<input type="number" id="clipStart" value="0" min="0" step="0.01"></label><label>分析終點（秒）<input type="number" id="clipEnd" value="5" min="0" step="0.01"></label><label>取樣頻率<select id="sampleFPS"><option value="10">10 次／播放秒</option><option value="15" selected>15 次／播放秒</option><option value="30">30 次／播放秒</option></select></label></div><progress id="analysisProgress" max="1" value="0" hidden></progress><div class="status-line" id="videoStatus" role="status">選擇影片後可回放、標記球路、量測投影速度。</div>
 </div>
 <div class="panel"><div class="panel-top"><div><span class="eyebrow">SWING SEQUENCE</span><h2>揮桿節奏</h2></div><span class="chip">手動標記時點</span></div><div class="phase-buttons"><button data-phase="address"><b>01</b>預備位<span id="phase-address">設為目前時間</span></button><button data-phase="top"><b>02</b>上桿頂點<span id="phase-top">設為目前時間</span></button><button data-phase="impact"><b>03</b>擊球瞬間<span id="phase-impact">設為目前時間</span></button><button data-phase="finish"><b>04</b>收桿<span id="phase-finish">設為目前時間</span></button></div><div id="tempoInfo" class="tempo-info">先標記預備位、頂點、擊球時點，再計算上桿／下桿時間比。</div><button id="clearPhases" class="text-btn">清除時點</button></div>
-</div><aside class="analysis-aside"><div class="panel"><div class="panel-top"><h2>畫面標記工具</h2><span class="chip accent">TOOLBOX</span></div><div class="tool-grid" id="annotationTools"><button data-tool="none" class="active"><span data-icon="cursor"></span>瀏覽</button><button data-tool="ball"><span data-icon="target"></span>標記球路</button><button data-tool="club"><span data-icon="golf"></span>標記桿頭</button><button data-tool="scale"><span data-icon="ruler"></span>設定比例</button><button data-tool="line"><span data-icon="line"></span>參考直線</button><button data-tool="angle"><span data-icon="angle"></span>三點量角</button></div><p id="toolHelp" class="hint">切到標記工具後，先暫停影片，再點選畫面。</p><div class="control-row compact"><button class="btn secondary small" id="undoAnnotation">復原</button><button class="btn ghost small" id="clearAnnotations">清除標記</button></div>
-<hr><h3>影像速度校正</h3><label>兩個比例點之間的實際長度（cm）<input id="scaleCm" type="number" value="100" min="1" max="1000"></label><label>慢動作倍率（播放秒 ÷ 實際秒）<select id="slowRatio"><option value="1">1×（正常時間）</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label><p class="hint">參考長度須與桿頭運動位於相近深度。選步距不會自動辨識拍攝 FPS；變速片段應先裁切成固定倍率。</p><div class="estimate-card"><span>桿頭投影速度 · 2D 估算</span><strong id="projectedSpeed">—<small> km/h</small></strong><p id="projectedInfo">先設比例，再於不同時間標記桿頭。不是雷達 Club Speed。</p></div><div class="control-row"><button class="btn primary full" id="saveVideoShot" disabled>儲存這次分析</button><button class="btn secondary full" id="exportAnalysis" disabled>匯出分析 JSON</button><button class="btn secondary full" id="downloadReviewSource" disabled>另存原始影片</button></div></div>
+</div><aside class="analysis-aside"><div class="panel"><div class="panel-top"><h2>畫面標記工具</h2><span class="chip accent">TOOLBOX</span></div><div class="tool-grid" id="annotationTools"><button data-tool="none" class="active"><span data-icon="cursor"></span>瀏覽</button><button data-tool="ball"><span data-icon="target"></span>標記球路</button><button data-tool="club"><span data-icon="golf"></span>標記桿頭</button><button data-tool="scale"><span data-icon="ruler"></span>設定比例</button><button data-tool="line"><span data-icon="line"></span>參考直線</button><button data-tool="angle"><span data-icon="angle"></span>三點量角</button><button data-tool="target"><span data-icon="target"></span>目標方向</button><button data-tool="face"><span data-icon="golf"></span>桿面朝向</button></div><p id="toolHelp" class="hint">切到標記工具後，先暫停影片，再點選畫面。</p><div class="control-row compact"><button class="btn secondary small" id="undoAnnotation">復原</button><button class="btn ghost small" id="clearAnnotations">清除標記</button></div>
+<hr><h3>影像速度校正</h3><label>兩個比例點之間的實際長度（cm）<input id="scaleCm" type="number" value="100" min="1" max="1000"></label><label>慢動作倍率（播放秒 ÷ 實際秒）<select id="slowRatio"><option value="1">1×（正常時間）</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label><p class="hint">參考長度須與桿頭運動位於相近深度。選步距不會自動辨識拍攝 FPS；變速片段應先裁切成固定倍率。</p><div class="estimate-card"><span>桿頭投影速度 · 2D 估算</span><strong id="projectedSpeed">—<small> km/h</small></strong><p id="projectedInfo">先設比例，再於不同時間標記桿頭。不是雷達 Club Speed。</p></div><div class="estimate-card face-estimate"><span>桿面標記方向差 · 2D</span><strong id="projectedFace">—<small>°</small></strong><p id="projectedFaceInfo">各點兩點設定「目標方向」和「桿面朝向」箭頭。不等於真實桿面開閉角。</p></div><div class="control-row"><button class="btn primary full" id="saveVideoShot" disabled>儲存這次分析</button><button class="btn secondary full" id="exportAnalysis" disabled>匯出分析 JSON</button><button class="btn secondary full" id="downloadReviewSource" disabled>另存原始影片</button></div></div>
 <div class="panel"><div class="panel-top"><h2>目前畫面姿態</h2></div><div id="videoMetrics" class="pose-metrics"></div></div></aside></div>
 </section>
 
 <section class="page" id="page-flight" hidden aria-label="彈道與桿面">
-<div class="workspace-bar"><div><span class="eyebrow">BALL FLIGHT LAB</span><h2>讀懂這一球的方向。</h2></div><select id="flightShot" class="select"><option value="">尚無擊球</option></select></div>
+<div class="flight-workbench">
+  <div class="flight-intro"><div><p class="eyebrow">CAPTURE. TRACE. UNDERSTAND.</p><h2>從畫面，找出這一桿的線索。</h2><p>上傳影片或直接開鏡頭；錄完就在這裡回放、標記與保存。</p></div><span class="chip accent">STUDIO 2.1</span></div>
+  <div class="flight-mode-tabs" role="tablist" aria-label="影像來源">
+    <button id="flightModeVideo" role="tab" aria-selected="true" aria-controls="flightReviewHost" data-mode="video" class="active"><span data-icon="upload"></span><span><b>上傳影片</b><small>相簿與錄後回放</small></span></button>
+    <button id="flightModeCamera" role="tab" aria-selected="false" aria-controls="flightCaptureHost" data-mode="camera" tabindex="-1"><span data-icon="camera"></span><span><b>手機相機</b><small>即時姿態＋同步錄影</small></span></button>
+  </div>
+  <div class="flight-steps"><span><b>01</b>選擇來源</span><span><b>02</b>回放定位</span><span><b>03</b>標記與校正</span><span><b>04</b>保存分析</span></div>
+  <p class="flight-boundary"><span class="connection-dot"></span>即時：人體姿態。錄後：手動標球路、校正桿速、比較桿面方向線。不會自動產生雷達數據。</p>
+</div>
+<div class="flight-summary" id="flightSummary" hidden>
+  <div><span>本段影片</span><strong id="flightClipLength">—</strong><small id="flightClipSource">尚未載入</small></div>
+  <div><span>球路標記</span><strong id="flightBallCount">0<small>點</small></strong><small>手動點選的影像軌跡</small></div>
+  <div><span>桿頭投影速度</span><strong id="flightProjectedSpeed">—</strong><small>校正後的區間平均峰值</small></div>
+  <div><span>桿面標記方向差</span><strong id="flightFaceAngle">—</strong><small>畫面線條夾角，非真實 Face Angle</small></div>
+</div>
+<div class="flight-context" id="flightContext" role="status">選擇影片後，用右側標記工具開始。</div>
+<div id="flightReviewHost" class="flight-host" role="tabpanel" aria-labelledby="flightModeVideo"></div>
+<div id="flightCaptureHost" class="flight-host" role="tabpanel" aria-labelledby="flightModeCamera" hidden></div>
+<details class="flight-external panel" id="flightExternalDetails"><summary><span><b>外部量測／手動擊球數據</b><small>保留原本的 3D 彈道與桿面圖；與上方影像推估分開。</small></span><span class="chip">展開資料</span></summary>
+<div class="workspace-bar"><div><span class="eyebrow">BALL FLIGHT LAB</span><h2>讀懂這一球的方向。</h2></div><select aria-label="已存擊球資料" id="flightShot" class="select"><option value="">尚無擊球</option></select><button class="btn secondary small" id="flightOpenSaved">開啟這球影片</button></div>
 <div class="flight-layout"><div class="panel"><div class="panel-top"><h2>多視角彈道</h2><div class="segmented" id="flightViews"><button data-view="perspective" class="active">3D</button><button data-view="side">側視</button><button data-view="top">俯視</button></div></div><div class="range-stage large"><canvas id="flightCanvas"></canvas><div class="range-topline"><span class="chip glass">資料重建示意 · 非實拍球路</span></div></div><div class="chart-caption" id="flightCaption">需要 Carry、Apex、Offline 才能繪製完整示意；缺少的值不會自動補零。</div></div><div class="panel"><div class="panel-top"><div><span class="eyebrow">DELIVERY</span><h2>桿面與路徑</h2></div><span class="chip" id="deliverySource">資料來源</span></div><div id="deliveryDiagram" class="delivery-diagram"></div><div id="deliveryNumbers" class="delivery-numbers"></div><p class="hint">球桿路徑與桿面角度以輸入或匯入數據繪製，不是從人體骨架推算。</p></div></div>
 <div class="panel"><div class="panel-top"><div><span class="eyebrow">ALL THE DETAILS</span><h2>完整擊球參數</h2></div><button class="btn secondary small" id="editFlightShot">編輯這一球</button></div><div class="full-metrics" id="fullMetrics"></div></div>
+</details>
 </section>
 
 <section class="page" id="page-history" hidden aria-label="紀錄與比較">
@@ -81,17 +101,19 @@
 <div class="panel"><div class="panel-top"><div><span class="eyebrow">PRIVATE BY DESIGN</span><h2>資料保管</h2></div></div><p class="hint readable">擊球資料保存在本機瀏覽器，影片使用 IndexedDB 儲存。清除網站資料、瀏覽器回收空間、或換裝置，都可能遺失內容。JSON 備份只含擊球數據；影片與逐幀分析 JSON 請另外下載。</p><div class="control-row"><button id="requestPersistence" class="btn secondary">請求保留儲存空間</button><button id="migrateLegacy" class="btn secondary">讀取舊版紀錄</button></div><div id="storageInfo" class="status-line">正在檢查本機儲存空間…</div><hr><button id="clearAll" class="btn danger full">刪除本機 SwingLab 紀錄</button></div></div>
 <div class="panel"><div class="panel-top"><h2>功能與量測邊界</h2><span class="chip">不混淆示意與實測</span></div><div class="boundary-grid"><div><b>手機直接可用</b><p>即時人體骨架、2D 關節角度、同步原始錄影、影片回放、逐時點標記、比較與匯出。</p></div><div><b>需要校正或輸入</b><p>2D 桿頭投影速度要有尺度和時間校正。球路線由逐幀點選；3D 彈道是根據數據的示意重建。</p></div><div><b>仍需外部量測</b><p>可靠的球速、旋轉、桿面角與完整彈道數據需合適感測設備與協定，本版提供輸入、匯入和視覺化。</p></div></div></div>
 </section>
-<footer class="footer"><span>SWINGLAB / STUDIO 2.0</span><span>觀察動作，記錄進步。<span class="footer-dot">·</span>非專業雷達替代品</span></footer>
+<footer class="footer"><span>SWINGLAB / STUDIO 2.1</span><span>觀察動作，記錄進步。<span class="footer-dot">·</span>非專業雷達替代品</span></footer>
 </main><nav class="mobile-nav" aria-label="手機功能選單"></nav>
 </div>
 <div class="modal-backdrop" id="shotModal" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="shotModalTitle"><div class="modal-header"><div><p class="eyebrow">SHOT DETAILS</p><h2 id="shotModalTitle">新增一球</h2></div><button class="icon-btn modal-close" aria-label="關閉"><span data-icon="close"></span></button></div><form id="shotForm"><div class="modal-body"><div class="notice neutral">這裡是手動輸入或外部數據。未提供的欄位留白，不會從人體姿態自動補值。</div><input id="shotID" type="hidden"><div class="control-row"><label>球桿<select id="formClub" class="club-options"></select></label><label>日期時間<input id="formDate" type="datetime-local" required></label></div><div class="input-metrics" id="shotFields"></div><label>備註<textarea id="formNotes" rows="2" maxlength="500" placeholder="球路、手感，或本球想改善的地方"></textarea></label><p id="shotFormError" class="error-text"></p></div><div class="modal-footer"><button class="btn secondary modal-close" type="button">取消</button><button class="btn primary" type="submit">儲存這一球</button></div></form></section></div>
 <div class="modal-backdrop" id="compareModal" hidden><section class="modal wide" role="dialog" aria-modal="true" aria-labelledby="comparisonTitle"><div class="modal-header"><div><p class="eyebrow">SIDE BY SIDE</p><h2 id="comparisonTitle">逐球比較</h2></div><button class="icon-btn modal-close" aria-label="關閉"><span data-icon="close"></span></button></div><div class="modal-body" id="comparisonContent"></div></section></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <noscript><div class="noscript">此程式需要啟用 JavaScript。</div></noscript>
-<script defer src="js/core.js?v=2.0.0"></script>
-<script defer src="js/visuals.js?v=2.0.0"></script>
-<script defer src="js/pose.js?v=2.0.0"></script>
-<script defer src="js/video.js?v=2.0.0"></script>
-<script defer src="js/live.js?v=2.0.0"></script>
-<script defer src="js/app.js?v=2.0.0"></script>
+<script defer src="js/core.js?v=2.1.0"></script>
+<script defer src="js/visuals.js?v=2.1.0"></script>
+<script defer src="js/pose.js?v=2.1.0"></script>
+<script defer src="js/projection.js?v=2.1.0"></script>
+<script defer src="js/video.js?v=2.1.0"></script>
+<script defer src="js/live.js?v=2.1.0"></script>
+<script defer src="js/flight.js?v=2.1.0"></script>
+<script defer src="js/app.js?v=2.1.0"></script>
 </body></html>
